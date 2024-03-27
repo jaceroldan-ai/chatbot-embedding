@@ -1,0 +1,82 @@
+button {
+    outline-color: transparent;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-white);
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 12px;
+    height: 36px;
+    padding-inline: 12px;
+    min-width: 80px;
+    max-width: max-content;
+    transition-duration: .2s;
+}
+
+button.iconic {
+    min-width: unset;
+    max-width: unset;
+    width: 36px;
+    padding-inline: 0;
+}
+
+button.iconic svg {
+    width: 24px;
+    height: 24px;
+}
+
+button.iconic svg > path {
+    fill: var(--color-error);
+}
+
+button:hover {
+    background-color: var(--color-white-hover);
+    border-color: var(--color-border-hover);
+    cursor: pointer;
+}
+
+button:disabled {
+    background-color: var(--color-white-disabled);
+    border-color: var(--color-border-disabled);
+    color: var(--color-disabled);
+    cursor: not-allowed;
+}
+
+button.block {
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+    display: flex;
+}
+
+button.accent,
+button.error {
+    border-color: transparent;
+    color: var(--color-white);
+}
+
+button.accent:disabled,
+button.error:disabled {
+    color: rgba(white, .75);
+}
+
+button.accent {
+    background-color: var(--color-accent);
+}
+
+button.accent:hover {
+    background-color: var(--color-accent-hover);
+}
+
+button.accent:disabled {
+    background-color: var(--color-accent-disabled);
+}
+
+button.error {
+    background-color: var(--color-error);
+}
+
+button.error:hover {
+    background-color: var(--color-error-hover);
+}
