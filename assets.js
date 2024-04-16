@@ -1,4 +1,10 @@
 export const styles = `
+    @import url('./reset.css');
+    @import url('./components/button.css');
+    @import url('./components/input.css');
+    @import url('./components/select.css');
+    @import url('./components/thumbnail.css');
+
     .widget__container * {
         box-sizing: border-box;
     }        
@@ -22,7 +28,6 @@ export const styles = `
     .widget__icon {
         font-size: 20px;
         cursor: pointer;
-        width: 60%;
         position: absolute;
         transition: transform .3s ease;
     }
