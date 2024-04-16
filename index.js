@@ -1,5 +1,4 @@
 import { styles, CLOSE_ICON, MESSAGE_ICON } from "./assets.js";
-// import axios from 'axios';
 
 
 class MessageWidget {
@@ -42,6 +41,7 @@ class MessageWidget {
     /**
      * Create a span element for the widget icon, give it a class of `widget__icon`, and update its innerHTML property to an icon that would serve as the widget icon.
      */
+    buttonContainer.style = "display: flex; align-items: center; justify-content: center;"
     const widgetIconElement = document.createElement("span");
     widgetIconElement.innerHTML = MESSAGE_ICON;
     widgetIconElement.classList.add("widget__icon");
@@ -99,7 +99,7 @@ class MessageWidget {
       is_public: true,
     };
 
-    const form = new FormData();
+    const form = new FormData();  
 
     for (let item in data) {
       form.append(item, data[item]);
@@ -109,11 +109,22 @@ class MessageWidget {
    })
   }
 
+  retrieveFormFields() {
+    // TODO: placeholder
+    // const url = 'http://localhost:8000/api-sileo/v1/board/embedded-card/create/';
+    // const data = axios.get(url);
+  }
+
+  /**
+   * Fetch and construct the form 
+   */
   createWidgetContent() {
+    this.retrieveFormFields();
     this.widgetContainer.innerHTML = `
         <header class="widget__header">
             <h3>Unlock your business potential with our seats!</h3>
             <p>We usually respond within a few hours</p>
+            <i data-v-75fb19a8="" class="icon mdi mdi-rocket-launch-outline"></i>
         </header>
         <form>
             <div class="form__field">
