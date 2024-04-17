@@ -1,4 +1,5 @@
 import { styles, CLOSE_ICON, MESSAGE_ICON } from "./assets.js";
+import axios from './axios';
 
 
 class MessageWidget {
@@ -105,9 +106,10 @@ class MessageWidget {
     }
 
     retrieveFormFields() {
-        // TODO: placeholder
-        // const url = 'http://localhost:8000/api-sileo/v1/board/embedded-card/create/';
-        // const data = axios.get(url);
+        // TODO: how would we identify which 
+        const url = 'http://localhost:8000/api-sileo/v1/hqzen/engagement-form-document-resource/get/539';
+        const data = axios.get(url);
+        console.log(data);
 
         return [
             {
@@ -143,7 +145,11 @@ class MessageWidget {
                 type: 'textarea',
                 label: 'Label',
                 id: 'textarea',
-            }, 
+            }, {
+                type: 'attachment',
+                label: 'Label',
+                id: 'attachment'
+            },
         ]
     }
 
