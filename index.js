@@ -113,15 +113,15 @@ class MessageWidget {
             {
                 type: 'text',
                 label: 'Label',
-                value: 'text'
+                id: 'text'
             }, {
                 type: 'email',
                 label: 'Label',
-                value: 'email'
+                id: 'email'
             }, {
                 type: 'select',
                 label: 'Label',
-                value: 'email',
+                id: 'select',
                 options: [
                     {label: 'Option 1', value: 'option_1'},
                     {label: 'Option 2', value: 'option_2'},
@@ -130,27 +130,75 @@ class MessageWidget {
             }, {
                 type: 'number',
                 label: 'Label',
-                value: 'number',
+                id: 'number',
+            }, {
+                type: 'date',
+                label: 'Label',
+                id: 'date',
             }, {
                 type: 'time',
                 label: 'Label',
-                value: 'time',
+                id: 'time',
             }, {
                 type: 'textarea',
                 label: 'Label',
-                value: 'textarea',
+                id: 'textarea',
             }, 
-        ]}
-
+        ]
     }
+
     resolveFormFieldElements(listOfElements) {
         const retList = [];
 
         for (let el of listOfElements) {
-            const labelContainer = document.createElement('div');
+            let labelContainer = document.createElement('div');
             labelContainer.classList.add('label-container');
-            // if (el.type == 'text')
+            let labelEl = document.createElement('label');
+            labelEl.innerText = el.label;
+            labelEl.htmlFor = el.id;
+            labelContainer.appendChild(labelEl);
+
+            // Appending text, email, number, date, and time
+            // input types
+            if ([
+                    'text',
+                    'email',
+                    'number',
+                    'date',
+                    'time'].indexOf(el.type) > -1) {
+                let inputEl = document.createElement('input');
+                inputEl.type = el.type;
+                inputEl.id = el.value;
+                inputEl.classList.add('block');
+                labelContainer.appendChild(inputEl);
+            }
+            // Appending select type
+            else if (el.type === 'select') {
+                let selectEl = document.createElement('select');
+                selectEl.id = el.value;
+                selectEl.classList.add('block');
+                for (let option of el.options) {
+                    let optionEl = document.createElement('option');
+                    optionEl.value = option.value;
+                    optionEl.innerText = option.label;
+                    selectEl.appendChild(optionEl);
+                }
+                labelContainer.appendChild(selectEl);
+            }
+            // Appending textarea type for longform
+            else if (el.type === 'textarea') {
+                let textareaEl = document.createElement('textarea');
+                textareaEl.cols = '30';
+                textareaEl.rows = '10';
+                textareaEl.classList.add('block');
+                textareaEl.id = el.value;
+                labelContainer.appendChild(textareaEl);
+            }
+
+            retList.push(labelContainer);
         }
+
+        return retList;
     }
 
     /**
@@ -158,8 +206,6 @@ class MessageWidget {
      * This is called every time the form is opened or closed.
      */
     createWidgetContent() {
-        const fieldCodes = this.retrieveFormFields();
-
         // Banner container setup
         const headerContainer = document.createElement('header');
         headerContainer.classList.add('banner-container');
@@ -174,82 +220,18 @@ class MessageWidget {
 
         // Form el setup
         const formEl = document.createElement('form');
-        formEl.action = "";
-        formEl.class = "funnel-form";
+        formEl.classList.add('funnel-form');
 
         // Form fields setup and appending or children
-        const formFieldEls = self.resolveFormFieldElements();
+        const formFieldEls = this.resolveFormFieldElements(this.retrieveFormFields());
+
+        // Appending of children nodes
         for (let el of formFieldEls) {
             formEl.appendChild(el);
         }
 
-        // Appending of children nodes
-
         // Appending of form to widgetContainer
-        
-        // this.widgetContainer.innerHTML = `
-        //     <header class="banner-container">
-        //         <img src="./assets/banner.jpg" width="100%">
-        //         <h1>Unlock your business potential with our seats!</h3>
-        //         <p>We usually respond within a few hours</h1>
-        //     </header>
-        //     <form>
-        //         <div class="form__field">
-        //             <label for="name">Name</label>
-        //             <input
-        //               type="text"
-        //               id="floating-name"
-        //               name="name"
-        //               placeholder="Enter your name"
-        //             />
-        //         </div>
-        //         <div class="form__field">
-        //             <label for="email">Email</label>
-        //             <input
-        //               type="email"
-        //               id="floating-email"
-        //               name="email"
-        //               placeholder="Enter your email"
-        //             />
-        //         </div>
-        //         <div class="form__field">
-        //             <label for="subject">Type of Business</label>
-        //             <input
-        //               type="text"
-        //               id="floating-subject"
-        //               name="business_type"
-        //               placeholder="Enter type of business"
-        //             />
-        //         </div>
-        //         <div class="form__field">
-        //             <label for="subject">Number of seats</label>
-        //             <input
-        //               type="number"
-        //               id="floating-subject"
-        //               name="no_seats"
-        //               placeholder="Enter number of seats"
-        //             />
-        //         </div>
-        //         <div class="form__field">
-        //             <label for="subject">Start date</label>
-        //             <input
-        //               type="date"
-        //               id="floating-subject"
-        //               name="date"
-        //             />
-        //         </div>
-        //         <div class="form__field">
-        //             <label for="message">Anything specific you need?</label>
-        //             <textarea
-        //               id="floating-message"
-        //               name="message"
-        //               placeholder="Enter your message"
-        //               rows="6"
-        //             ></textarea>
-        //         </div>
-        //         <button id="submit-hqzen-btn">Let's Get Started</button>
-        //     </form>
-        // `;
+        this.widgetContainer.appendChild(formEl);
     }
 
   injectStyles() {

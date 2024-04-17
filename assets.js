@@ -5,6 +5,49 @@ export const styles = `
     @import url('./components/select.css');
     @import url('./components/thumbnail.css');
 
+    #app {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .banner-container {
+        position: relative;
+    }
+
+    .banner-container img {
+        aspect-ratio: 3 / 1;
+        object-fit: cover;
+    }
+
+    .banner-container h1 {
+        position: absolute;
+        top: 50%;
+        left: 40px;
+        transform: translateY(-50%);
+        z-index: 2;
+        color: var(--color-white);
+    }
+
+    .funnel-form {
+        display: flex;
+        flex-direction: column;
+        row-gap: 24px;
+        width: 100%;
+        padding: 24px;
+    }
+
+    .funnel-form .label-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .funnel-form .label-container label {
+        font-weight: 600;
+        color: var(--color-secondary);
+    }
+
     .widget__container * {
         box-sizing: border-box;
     }        
