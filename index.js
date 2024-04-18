@@ -1,5 +1,4 @@
 import { styles, CLOSE_ICON, MESSAGE_ICON } from "./assets.js";
-import axios from './axios';
 
 
 class MessageWidget {
@@ -105,55 +104,83 @@ class MessageWidget {
         })
     }
 
-    retrieveFormFields() {
-        // TODO: how would we identify which 
-        const url = 'http://localhost:8000/api-sileo/v1/hqzen/engagement-form-document-resource/get/539';
-        const data = axios.get(url);
+    /**
+     * 
+     * @param {object} data 
+     * Can take in one of 'text', 'email', 'number', 'date', 'time', 'textarea',
+     * 'select'
+     * 
+     * One caveat here is that this does not handle attachments just yet.
+     * @returns array of formatted element fields
+     */
+    extractQuestionsFromSections(data) {
         console.log(data);
+        const questionData = data.form_sections.flatMap(
+            section => section.form_questions
+        ).filter(q => q.question_type_display !== 'Attachment');
+        const formattedFields = questionData.map(q => {
+            const label = q.text;
+            const id = q.pk;
+            let type, options;
+            if (q.question_type_display === 'Paragraph') {
+                type = 'textarea';
+            } else if (q.question_type_display === 'Datetime') {
+                type = 'date';
+            } else if (q.question_type_display === 'Short Text') {
+                type = 'text';
+            } else if (['Dropdown', 'Switch'].includes(q.question_type_display)) {
+                type = 'select';
+                if (q.question_type_display === 'Dropdown') {
+                    options = q.linked_choices.map(c => {
+                        return {label: c.text, value: c.text}
+                    });
+                } else {
+                    options = [
+                        {label: 'Yes', value: 'Yes'},
+                        {label: 'No', value: 'No'}
+                    ];
+                }
+            }
+            return {
+                label,
+                type,
+                id,
+                options,
+            }
+        });
+        return formattedFields;
+    }
 
-        return [
-            {
-                type: 'text',
-                label: 'Label',
-                id: 'text'
-            }, {
-                type: 'email',
-                label: 'Label',
-                id: 'email'
-            }, {
-                type: 'select',
-                label: 'Label',
-                id: 'select',
-                options: [
-                    {label: 'Option 1', value: 'option_1'},
-                    {label: 'Option 2', value: 'option_2'},
-                    {label: 'Option 3', value: 'option_3'},
-                ]
-            }, {
-                type: 'number',
-                label: 'Label',
-                id: 'number',
-            }, {
-                type: 'date',
-                label: 'Label',
-                id: 'date',
-            }, {
-                type: 'time',
-                label: 'Label',
-                id: 'time',
-            }, {
-                type: 'textarea',
-                label: 'Label',
-                id: 'textarea',
-            }, {
-                type: 'attachment',
-                label: 'Label',
-                id: 'attachment'
-            },
-        ]
+    retrieveFormFields() {
+        // TODO: how would we identify which
+        const extractQuestionsFromSections = this.extractQuestionsFromSections;
+        return new Promise((resolve, reject) => {
+            const pk = String(482)
+            const baseUrl = 'http://localhost:8000/api-sileo/v1/hqzen/engagement-form-document-resource/get/';
+            const completeUrl = baseUrl + pk;
+    
+            const req = new XMLHttpRequest();
+
+            req.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    try {
+                        const response = JSON.parse(this.responseText);
+                        const formFields = extractQuestionsFromSections(response.data);
+                        console.log('formfields', formFields);
+                        resolve(formFields);
+                        console.log('resolved');
+                    } catch (e) {
+                        reject(e);
+                    }
+                }
+            }
+            req.open('GET', completeUrl);
+            req.send();
+        })
     }
 
     resolveFormFieldElements(listOfElements) {
+        console.log('elements', listOfElements);
         const retList = [];
 
         for (let el of listOfElements) {
@@ -171,7 +198,7 @@ class MessageWidget {
                     'email',
                     'number',
                     'date',
-                    'time'].indexOf(el.type) > -1) {
+                    'time'].includes(el.type)) {
                 let inputEl = document.createElement('input');
                 inputEl.type = el.type;
                 inputEl.id = el.value;
@@ -211,7 +238,7 @@ class MessageWidget {
      * Fetch and construct the form.
      * This is called every time the form is opened or closed.
      */
-    createWidgetContent() {
+    async createWidgetContent() {
         // Banner container setup
         const headerContainer = document.createElement('header');
         headerContainer.classList.add('banner-container');
@@ -229,7 +256,8 @@ class MessageWidget {
         formEl.classList.add('funnel-form');
 
         // Form fields setup and appending or children
-        const formFieldEls = this.resolveFormFieldElements(this.retrieveFormFields());
+        const fields = await this.retrieveFormFields();
+        const formFieldEls = this.resolveFormFieldElements(fields);
 
         // Appending of children nodes
         for (let el of formFieldEls) {
