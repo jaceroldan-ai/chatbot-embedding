@@ -222,34 +222,34 @@ class MessageWidget {
         container.appendChild(this.widgetContainer);
         container.appendChild(buttonContainer);
         document.getElementById('submit-hqzen-btn').addEventListener('click', event => {
-        event.preventDefault();
+            event.preventDefault();
 
-        const url = 'http://localhost:8000/api-sileo/v1/board/embedded-card/create/';
-        const subject = document.getElementById('floating-subject').value;
-        const name = document.getElementById('floating-name').value;
-        const email = document.getElementById('floating-email').value;
-        const message = document.getElementById('floating-message').value;
-  
-        const data = {
-            title: subject,
-            description: JSON.stringify({'ops': [
-                {'insert': `Name: ${name}`, 'attributes': {'fs': '24px'}}, {'insert': '\n'},
-                {'insert': `Email: ${email}`, 'attributes': {'fs': '24px'}}, {'insert': '\n'},
-                {'insert': `Message: ${message}`, 'attributes': {'fs': '24px'}}, {'insert': '\n'},
-            ]}),
-            column: 213,
-            creator: 84202,
-            is_public: true,
-        };
+            const url = 'http://localhost:8000/api-sileo/v1/board/embedded-card/create/';
+            const subject = document.getElementById('floating-subject').value;
+            const name = document.getElementById('floating-name').value;
+            const email = document.getElementById('floating-email').value;
+            const message = document.getElementById('floating-message').value;
+    
+            const data = {
+                title: subject,
+                description: JSON.stringify({'ops': [
+                    {'insert': `Name: ${name}`, 'attributes': {'fs': '24px'}}, {'insert': '\n'},
+                    {'insert': `Email: ${email}`, 'attributes': {'fs': '24px'}}, {'insert': '\n'},
+                    {'insert': `Message: ${message}`, 'attributes': {'fs': '24px'}}, {'insert': '\n'},
+                ]}),
+                column: 213,
+                creator: 84202,
+                is_public: true,
+            };
 
-        const form = new FormData();  
+            const form = new FormData();  
 
-        for (let item in data) {
-            form.append(item, data[item]);
-        }
+            for (let item in data) {
+                form.append(item, data[item]);
+            }
 
-            axios.post(url, form);
-        })
+                axios.post(url, form);
+            })
     }
 
     /**
@@ -301,6 +301,8 @@ class MessageWidget {
     retrieveFormFields() {
         // TODO: how would we identify which
         const extractQuestionsFromSections = this.extractQuestionsFromSections;
+        const self = this;
+
         return new Promise((resolve, reject) => {
             // accessed through data-param1
             const scriptTags = document.querySelectorAll('script');
@@ -327,6 +329,9 @@ class MessageWidget {
                         const response = JSON.parse(this.responseText);
                         const formFields = extractQuestionsFromSections(response.data);
                         console.log('formfields', formFields);
+                        console.log(response.data);
+                        self.column = response.data.owner.columns.filter(c => c.header === 'To Do')[0];
+                        self.formFields = formFields;
                         resolve(formFields);
                         console.log('resolved');
                     } catch (e) {
@@ -361,14 +366,14 @@ class MessageWidget {
                     'time'].includes(el.type)) {
                 let inputEl = document.createElement('input');
                 inputEl.type = el.type;
-                inputEl.id = el.value;
+                inputEl.id = el.id;
                 inputEl.classList.add('block');
                 labelContainer.appendChild(inputEl);
             }
             // Appending select type
             else if (el.type === 'select') {
                 let selectEl = document.createElement('select');
-                selectEl.id = el.value;
+                selectEl.id = el.id;
                 selectEl.classList.add('block');
                 for (let option of el.options) {
                     let optionEl = document.createElement('option');
@@ -384,7 +389,7 @@ class MessageWidget {
                 textareaEl.cols = '30';
                 textareaEl.rows = '10';
                 textareaEl.classList.add('block');
-                textareaEl.id = el.value;
+                textareaEl.id = el.id;
                 labelContainer.appendChild(textareaEl);
             }
 
@@ -426,29 +431,102 @@ class MessageWidget {
         }
 
         // Appending of form to widgetContainer
+        const buttonEl = document.createElement('button');
+        buttonEl.classList.add('accent');
+        buttonEl.classList.add('block');
+        buttonEl.innerText = 'Get started!';
+        buttonEl.addEventListener('click', event => {
+            event.preventDefault();
+
+            const url = 'http://localhost:8000/api-sileo/v1/hqzen/internal-card/create/';
+            const descriptionValues = this.formFields.flatMap(ff => {
+                const id = ff.id;
+                const label = ff.value;
+                const value = document.getElementById(id).value;
+
+                return [{
+                    'insert': `${label}: ${value}`,
+                    'attributes': {'fs': '24px'}
+                }, {
+                    'insert': '\n'
+                }];
+            });
+
+            const data = {
+                title: 'New embedded engagement form issue',
+                description: JSON.stringify({'ops': descriptionValues}),
+                column: this.column.pk,
+                creator: 84202,
+                is_public: true,
+                total_points: 0,
+            }
+            
+            const form = new FormData();
+
+            for (let item in data) {
+                form.append(item, data[item]);
+            }
+
+            this.createCard(url, form);
+        });
+        formEl.appendChild(buttonEl);
         this.widgetContainer.appendChild(formEl);
     }
 
-  injectStyles() {
-    const styleTag = document.createElement("style");
-    styleTag.innerHTML = styles.replace(/^\s+|\n/gm, "");
-    document.head.appendChild(styleTag);
-  }
+    createCard(url, form) {
+        const self = this;
+        return new Promise((resolve, reject) => {
+            const req = new XMLHttpRequest();
 
-  toggleOpen() {
-    this.open = !this.open;
-    if (this.open) {
-      this.createWidgetContent();
-      this.widgetIcon.classList.add("widget__hidden");
-      this.closeIcon.classList.remove("widget__hidden");
-      this.widgetContainer.classList.remove("widget__hidden");
-    } else {
-      this.widgetIcon.classList.remove("widget__hidden");
-      this.closeIcon.classList.add("widget__hidden");
-      this.widgetContainer.classList.add("widget__hidden");
-      this.widgetContainer.innerHTML = '';
+            req.onreadystatechange = function() {
+                console.log(this.status);
+                if (this.readyState === 4 && this.status === 201) {
+                    try {
+                        const response = JSON.parse(this.responseText);
+                        console.log(response);
+                        resolve(response.data);
+                        // TODO: Need a better V2
+                        alert('card created!');
+                        self.cleanForm();
+                    } catch (e) {
+                        reject(e);
+                    }
+                }
+            }
+            req.open('POST', url);
+            req.send(form);
+        });
     }
-  }
+
+    cleanForm() {
+        this.formFields.forEach(ff => {
+            const id = ff.id;
+            const el = document.getElementById(id);
+            console.log('el', el);
+            el.value = '';
+        });
+    }
+
+    injectStyles() {
+        const styleTag = document.createElement("style");
+        styleTag.innerHTML = styles.replace(/^\s+|\n/gm, "");
+        document.head.appendChild(styleTag);
+    }
+
+    toggleOpen() {
+        this.open = !this.open;
+        if (this.open) {
+            this.createWidgetContent();
+            this.widgetIcon.classList.add("widget__hidden");
+            this.closeIcon.classList.remove("widget__hidden");
+            this.widgetContainer.classList.remove("widget__hidden");
+        } else {
+            this.widgetIcon.classList.remove("widget__hidden");
+            this.closeIcon.classList.add("widget__hidden");
+            this.widgetContainer.classList.add("widget__hidden");
+            this.widgetContainer.innerHTML = '';
+        }
+    }
 }
 
 function initializeWidget() {

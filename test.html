@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copy Code Snippet</title>
+<style>
+    .code-container {
+        position: relative;
+        background: #f4f4f4;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px 0;
+        font-family: monospace;
+    }
+    button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        padding: 5px 10px;
+    }
+</style>
+</head>
+<body>
+<div class="code-container">
+    <pre id="codeSnippet">
+function helloWorld() {
+    console.log("Hello, world!asdfsfas");
+}
+    </pre>
+    <button onclick="copyCode()">Copy</button>
+</div>
+
+<script>
+function copyCode() {
+    const text = document.getElementById('codeSnippet').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        console.log('code copied!')
+    }, (err) => {
+        console.error('Failed to copy text: ', err);
+    });
+}
+</script>
+
+</body>
+</html>

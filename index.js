@@ -153,6 +153,7 @@ class MessageWidget {
     retrieveFormFields() {
         // TODO: how would we identify which
         const extractQuestionsFromSections = this.extractQuestionsFromSections;
+        const self = this;
         return new Promise((resolve, reject) => {
             // accessed through data-param1
             // const scriptTag = document.querySelector('script[src*="https://cdn.jsdelivr.net/gh/jaceroldan-ai"]');
@@ -170,7 +171,9 @@ class MessageWidget {
                     try {
                         const response = JSON.parse(this.responseText);
                         const formFields = extractQuestionsFromSections(response.data);
+                        console.log(response);
                         console.log('formfields', formFields);
+                        self.column = response.data.owner.columns.filter(c => c.header === 'To Do')[0];
                         resolve(formFields);
                         console.log('resolved');
                     } catch (e) {
