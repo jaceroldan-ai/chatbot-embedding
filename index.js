@@ -114,7 +114,6 @@ class MessageWidget {
      * @returns array of formatted element fields
      */
     extractQuestionsFromSections(data) {
-        console.log(data);
         const questionData = data.form_sections.flatMap(
             section => section.form_questions
         ).filter(q => q.question_type_display !== 'Attachment');
@@ -155,7 +154,11 @@ class MessageWidget {
         // TODO: how would we identify which
         const extractQuestionsFromSections = this.extractQuestionsFromSections;
         return new Promise((resolve, reject) => {
-            const pk = String(482)
+            // accessed through data-param1
+            // const scriptTag = document.querySelector('script[src*="https://cdn.jsdelivr.net/gh/jaceroldan-ai"]');
+            const scriptTag = document.querySelector('script');
+            console.log('scriptTag', scriptTag);
+            const pk = String(482);
             const baseUrl = 'http://localhost:8000/api-sileo/v1/hqzen/engagement-form-document-resource/get/';
             const completeUrl = baseUrl + pk;
     
