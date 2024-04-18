@@ -156,6 +156,7 @@ class MessageWidget {
         return new Promise((resolve, reject) => {
             // accessed through data-param1
             // const scriptTag = document.querySelector('script[src*="https://cdn.jsdelivr.net/gh/jaceroldan-ai"]');
+            // const scriptTag = document.querySelector('script[src*="https://cdn.jsdelivr.net/gh/jaceroldan-ai"]');
             const scriptTag = document.querySelector('script');
             console.log('scriptTag', scriptTag);
             const pk = String(482);
