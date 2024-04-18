@@ -157,7 +157,7 @@ class MessageWidget {
             // accessed through data-param1
             // const scriptTag = document.querySelector('script[src*="https://cdn.jsdelivr.net/gh/jaceroldan-ai"]');
             // const scriptTag = document.querySelector('script[src*="https://cdn.jsdelivr.net/gh/jaceroldan-ai"]');
-            const scriptTag = document.querySelector('script');
+            const scriptTag = document.querySelectorAll('script');
             console.log('scriptTag', scriptTag);
             const pk = String(482);
             const baseUrl = 'http://localhost:8000/api-sileo/v1/hqzen/engagement-form-document-resource/get/';
