@@ -59,17 +59,18 @@ const styles = `
         box-shadow: 0 0 18px 8px rgba(0, 0, 0, 0.1), 0 0 32px 32px rgba(0, 0, 0, 0.08);
         width: 400px;
         overflow: auto;
-        right: -25px;
+        right: 0;
         bottom: 75px;
+        height: calc(100vh - 135px);
         position: absolute;
         transition: max-height .2s ease;
         font-family: Helvetica, Arial ,sans-serif;
-        background-color: #e6e6e6a6;
+        background-color: var(--color-container);
         border-radius: 10px;
         box-sizing: border-box;
     }
     .widget__icon {
-        font-size: 20px;
+        font-size: 28px;
         cursor: pointer;
         position: absolute;
         transition: transform .3s ease;
@@ -79,19 +80,22 @@ const styles = `
     }
     .button__container {
         border: none;
-        background-color: #0f172a;
+        background-color: var(--color-accent);
         width: 60px;
         height: 60px;
         border-radius: 50%;
         cursor: pointer;
+    }
+    .button__container:hover {
+        background-color: var(--color-accent-hover);
     }
     .widget__container.hidden {
         max-height: 0px;
     }
     .widget__header {
         padding: 1rem 2rem 1.5rem;
-        background-color: #000;
-        color: #fff;
+        background-color: var(--color-primary);
+        color: var(--color-white);
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
         text-align: center;
@@ -115,10 +119,10 @@ const styles = `
     }
     .form__field input,
     .form__field textarea {
-        border: 1px solid #000000ad;
+        border: 1px solid var(--border);
         border-radius: 3px;
         padding: 8px 10px;
-        background-color: #fff;
+        background-color: var(--white);
     }
     .form__field input {
         height: 48px;
@@ -130,8 +134,8 @@ const styles = `
         height: 48px;
         border-radius: 6px;
         font-size: 18px;
-        background-color: #000;
-        color: #fff;
+        background-color: var(--color-primary);
+        color: var(--color-white);
         border: 0;
         width: 100%;
         cursor: pointer;
