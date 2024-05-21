@@ -14,6 +14,10 @@ button {
     transition-duration: .2s;
 }
 
+button.rounded {
+    border-radius: 50%;
+}
+
 button.iconic {
     min-width: unset;
     max-width: unset;

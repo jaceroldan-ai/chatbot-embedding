@@ -10,10 +10,12 @@
     --color-accent: #008FF5;
     --color-error: #ED2B42;
     --color-white: #FFFFFF;
+    --color-accent-highlight: #DBEDFD;
     --color-white-hover: #EBEDEF;
     --color-accent-hover: #0374C7;
     --color-error-hover: #BF2335;
     --color-border-hover: #BEC5CA;
+    --color-accent-highlight-hover: #A4D6FB;
     --color-white-disabled: #FAFAFA;
     --color-border-disabled: #EBEDEF;
     --color-accent-disabled: #6EBEF9;

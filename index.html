@@ -18,22 +18,55 @@
     <div class="position: fixed; bottom: 30px; right: 30px;">
         <div class="widget__container">
             <header class="header">
-
+                <p class="t-md bold">Chat with Zenbot</p>
             </header>
             <section class="body">
                 <ul class="message-thread">
-                    <p>dsdas dasd</p>
-                    <p>dsdas dasd</p>
-                    <p>dsdas dasd</p>
-                    <p>dsdas dasd</p>
-                    <p>dsdas dasd</p>
+                    <li class="message-response">
+                        <p class="bold c-tertiary">Select your response:</p>
+                        <div class="response-container">
+                            <div role="button" class="response">
+                                <i class="mdi mdi-comment-text-outline mdi-18px"></i>
+                                <p>Response</p>
+                            </div>
+                            <div role="button" class="response">
+                                <i class="mdi mdi-sync mdi-18px"></i>
+                                <p>Regenerate</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="message-sender">
+                        <img src="" />
+                        <div class="message">
+                            <p><strong>You</strong></p>
+                            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.</p>
+                        </div>
+                    </li>
+                    <li class="message-recepient">
+                        <div class="icon-container">
+                            <i class="mdi mdi-creation mdi-24px"></i>
+                        </div>
+                        <div class="message">
+                            <p><strong>Zenbot</strong></p>
+                            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.</p>
+                        </div>
+                    </li>
                 </ul>
             </section>
             <footer class="footer">
-
+                <div class="message-field">
+                    <textarea placeholder="Enter message" rows="10" class="block"></textarea>
+                    <div class="actions">
+                        <div></div>
+                        <button class="send-button accent iconic rounded">
+                            <i class="mdi mdi-send mdi-18px"></i>
+                        </button>
+                    </div>
+                </div>
             </footer>
         </div>
     </div>
+    <!-- TODO: Uncomment once integrated -->
     <!-- <script type="module" src="/index-test12.js"></script> -->
 </body>
 

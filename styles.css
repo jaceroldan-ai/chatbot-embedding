@@ -10,7 +10,7 @@
     padding: 2rem;
 }
 
-/* TODO: AI Chatbot styles */
+/* TODO: AI Chatbot styles. Move this to js */
 
 .widget__container {
     box-shadow: 0 0 18px 8px rgba(0, 0, 0, 0.1), 0 0 32px 32px rgba(0, 0, 0, 0.08);
@@ -48,7 +48,7 @@
     scroll-behavior: smooth;
     scroll-snap-type: y mandatory;
     margin: 0;
-    padding: 0;
+    padding: 12px 0;
 }
 
 .widget__container .body .message-thread li {
@@ -58,4 +58,91 @@
 .widget__container .footer {
     padding: 12px;
     border-top: 1px solid var(--color-border);
+}
+
+.message-sender,
+.message-recepient {
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+}
+
+.message-sender .message,
+.message-recepient .message {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message-sender img {
+    display: inline-block;
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.message-recepient .icon-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    flex-shrink: 0;
+}
+
+.message-response {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+}
+
+.response-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.response {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 24px;
+    border: 1px solid var(--color-accent);
+    background-color: var(--color-accent-highlight);
+    color: var(--color-accent);
+}
+
+.response:hover {
+    background-color: var(--color-accent-highlight-hover);
+    border-color: var(--color-accent-hover);
+    color: var(--color-accent-hover);
+    cursor: pointer;
+}
+
+.message-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-field textarea {
+    border-radius: 4px 4px 0 0;
+}
+
+.message-field .actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 0 0 4px 4px;
+    border: 1px solid var(--color-border);
+    border-top-color: transparent;
+    padding: 8px 12px;
 }
