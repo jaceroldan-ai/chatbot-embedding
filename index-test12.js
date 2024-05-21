@@ -5,12 +5,6 @@ const styles = `
     @import url('./components/select.css');
     @import url('./components/thumbnail.css');
 
-    #app {
-        max-width: 480px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-
     .banner-container {
         position: relative;
     }

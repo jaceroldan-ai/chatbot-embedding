@@ -10,39 +10,52 @@
     padding: 2rem;
 }
 
-.banner-container {
-    position: relative;
-}
+/* TODO: AI Chatbot styles */
 
-.banner-container img {
-    aspect-ratio: 3 / 1;
-    object-fit: cover;
-}
-
-.banner-container h1 {
+.widget__container {
+    box-shadow: 0 0 18px 8px rgba(0, 0, 0, 0.1), 0 0 32px 32px rgba(0, 0, 0, 0.08);
+    width: 400px;
+    overflow: auto;
+    right: 30px;
+    top: 75px;
+    bottom: 75px;
     position: absolute;
-    top: 50%;
-    left: 40px;
-    transform: translateY(-50%);
-    z-index: 2;
-    color: var(--color-white);
+    transition: max-height .2s ease;
+    font-family: Helvetica, Arial ,sans-serif;
+    background-color: var(--color-container);
+    border-radius: 10px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
 }
 
-.funnel-form {
+.widget__container .header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.widget__container .body {
     display: flex;
     flex-direction: column;
-    row-gap: 24px;
-    width: 100%;
-    padding: 24px;
+    overflow-y: auto;
 }
 
-.funnel-form .label-container {
+.widget__container .body .message-thread {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: column-reverse;
+    overflow: hidden auto;
+    height: 100%;
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+    margin: 0;
+    padding: 0;
 }
 
-.funnel-form .label-container label {
-    font-weight: 600;
-    color: var(--color-secondary);
+.widget__container .body .message-thread li {
+    list-style: none;
+}
+
+.widget__container .footer {
+    padding: 12px;
+    border-top: 1px solid var(--color-border);
 }
