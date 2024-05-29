@@ -433,7 +433,7 @@ class MessageWidget {
                     try {
                         const response = JSON.parse(this.responseText);
                         activePreset = response.data.find(preset => preset.is_active);
-                        resolve(active_preset);
+                        resolve(activePreset);
                     } catch (e) {
                         reject(e);
                     }
