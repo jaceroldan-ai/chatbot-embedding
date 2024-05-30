@@ -199,6 +199,7 @@ const DATA_COLLECTION = 4
 const USER_INPUT = 5
 
 var activePreset;
+let activeBlock;
 
 class MessageWidget {
     constructor(position = "bottom-right") {
@@ -413,21 +414,7 @@ class MessageWidget {
 
         activePreset = this.fetchMessageBlocks();
         this.setupEventListeners();
-        (async () => {
-            try {
-                const result = await activePreset;
-                console.log(result)
-                for (const block of result.message_blocks) {
-                    if (block.type === FIXED) {
-                        this.addBotReply(block);
-                    } else {
-                        await this.handleUserResponse(block); // Add await if handleUserResponse is async
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        })();
+        this.processActivePreset(activePreset);
     }
 
     injectStyles() {
@@ -473,6 +460,33 @@ class MessageWidget {
         })
     }
 
+    async processActivePreset(activePreset, block) {
+        try {
+            let result = await activePreset;
+            if (!this.activeBlock) {
+                this.activeBlock = result.message_blocks.find(block => block.pk == result.start_node_id);
+            }else{
+                this.activeBlock = result.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
+            }
+            if(!this.activeBlock){
+                return
+            }
+
+            if (this.activeBlock.type ===FIXED){
+                this.addBotReply(this.activeBlock);
+
+            }else{
+                await this.handleUserResponse(this.activeBlock);
+            }
+
+            if(!activeBlock?.next){
+                this.processActivePreset(activePreset, block)
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     addBotReply(block){
         if (block.type === FIXED){
             const messageThread = document.getElementById('thread');
@@ -494,7 +508,6 @@ class MessageWidget {
             messageRecipient.appendChild(recipientIconContainer);
             messageRecipient.appendChild(recipientMessage);
             messageThread.appendChild(messageRecipient);
-
         }
     }
 
@@ -525,7 +538,7 @@ class MessageWidget {
         });
     }
 
-    addUserReply(userInput){
+    addUserReply(userInput){    
         const messageThread = document.getElementById('thread');
         const messageSender = document.createElement('li');
         messageSender.className = 'message-sender';
