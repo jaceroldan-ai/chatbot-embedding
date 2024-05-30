@@ -192,7 +192,7 @@ const CLOSE_ICON = `
     <i class="icon mdi mdi-close" style="color: white;"></i>
 `;
 
-var activePreset;
+let activePreset;
 
 class MessageWidget {
     constructor(position = "bottom-right") {
