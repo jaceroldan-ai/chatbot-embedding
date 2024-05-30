@@ -414,7 +414,7 @@ class MessageWidget {
 
         activePreset = this.fetchMessageBlocks();
         this.setupEventListeners();
-        this.processActivePreset(activePreset);
+        this.setUpMessageBlock(activePreset);
     }
 
     injectStyles() {
@@ -460,7 +460,7 @@ class MessageWidget {
         })
     }
 
-    async processActivePreset(activePreset, block) {
+    async setUpMessageBlock(activePreset, block) {
         try {
             let result = await activePreset;
             if (!this.activeBlock) {
@@ -480,7 +480,7 @@ class MessageWidget {
             }
 
             if(!activeBlock?.next){
-                this.processActivePreset(activePreset, block)
+                this.setUpMessageBlock(activePreset, block)
             }
         } catch (error) {
             console.error(error);
