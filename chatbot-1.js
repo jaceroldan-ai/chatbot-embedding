@@ -460,7 +460,7 @@ class MessageWidget {
         })
     }
 
-    async setUpMessageBlock(activePreset, block) {
+    async setUpMessageBlock(activePreset) {
         try {
             let result = await activePreset;
             if (!this.activeBlock) {
@@ -480,7 +480,7 @@ class MessageWidget {
             }
 
             if(!activeBlock?.next){
-                this.setUpMessageBlock(activePreset, block)
+                this.setUpMessageBlock(activePreset)
             }
         } catch (error) {
             console.error(error);
