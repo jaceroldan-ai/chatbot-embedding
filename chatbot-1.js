@@ -192,6 +192,8 @@ const CLOSE_ICON = `
     <i class="icon mdi mdi-close" style="color: white;"></i>
 `;
 
+let activePreset;
+
 class MessageWidget {
     constructor(position = "bottom-right") {
         this.position = this.getPosition(position);
@@ -271,7 +273,6 @@ class MessageWidget {
      * This is called every time the form is opened or closed.
      */
     async createWidgetContent() {
-            console.log("haweg")
         const appDiv = document.createElement('div');
         appDiv.id = 'app';
         document.body.appendChild(appDiv);
@@ -388,15 +389,16 @@ class MessageWidget {
         document.body.appendChild(this.widgetContainer);
         // Banner container setup
         const headerContainer = document.createElement('header');
-        headerContainer.appendChild(bannerImageEl);
+        // headerContainer.appendChild(bannerImageEl);
         this.widgetContainer.appendChild(headerContainer);
-        console.log("haha")
 
         // Appending of form to widgetContainer
         const buttonEl = document.createElement('button');
         buttonEl.classList.add('accent');
         buttonEl.classList.add('block');
         buttonEl.innerText = 'Get started!';
+
+        this.fetchMessageBlocks();
     }
 
     injectStyles() {
@@ -418,6 +420,28 @@ class MessageWidget {
             this.widgetContainer.classList.add("widget__hidden");
             this.widgetContainer.innerHTML = '';
         }
+    }
+
+    fetchMessageBlocks() {
+        return new Promise((resolve, reject) => {
+            const conversationTemplatePk = 1;
+            const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
+
+            const req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    try {
+                        const response = JSON.parse(this.responseText);
+                        activePreset = response.data.find(preset => preset.is_active);
+                        resolve(activePreset);
+                    } catch (e) {
+                        reject(e);
+                    }
+                }
+            }
+            req.open('GET', url);
+            req.send();
+        })
     }
 }
 
