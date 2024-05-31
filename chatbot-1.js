@@ -412,9 +412,18 @@ class MessageWidget {
         buttonEl.classList.add('block');
         buttonEl.innerText = 'Get started!';
 
-        activePreset = this.fetchMessageBlocks();
+        activePreset = await this.fetchMessageBlocks();
         this.setupEventListeners();
         this.setUpMessageBlock(activePreset);
+
+        const token = await this.fetchWebsocketToken();
+        const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${token}`;
+        const websocket = new WebSocket(url);
+
+        websocket.onmessage = (event) => {
+            const data = event.data;
+            console.log(data);
+        }
     }
 
     injectStyles() {
@@ -558,6 +567,51 @@ class MessageWidget {
         messageThread.appendChild(messageSender);
     }
     
+    fetchWebsocketToken() {
+        return new Promise((resolve, reject) => {
+            const token = 'localhost';
+            const url = `http://localhost:8000/websocket-boards-chatbot-token/?token=${token}`;
+            const req = new XMLHttpRequest();
+
+            req.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    try {
+                        const response = JSON.parse(this.responseText);
+                        resolve(response.token);
+                    } catch(e) {
+                        reject(e);
+                    }
+                }
+            }
+            req.open('GET', url);
+            req.send();
+        });
+    }
+
+    fetchAiCompletion() {
+        return new Promise((resolve, reject) => {
+            const url = `http://localhost:8000/board/ai-completion`
+            const form = new FormData();
+            const req = new XMLHttpRequest();
+
+            form.append('auth_token', 'token');
+            form.append('current_state_pk', activeBlock.pk);
+            form.append('messages', JSON.stringify(['message']));
+
+            req.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    try {
+                        const response = JSON.parse(this.responseText);
+                        resolve(response);
+                    } catch(e) {
+                        reject(e);
+                    }
+                }
+            }
+            req.open('POST', url);
+            req.send(form);
+        });
+    }
 }
 
 function initializeWidget() {
