@@ -198,8 +198,8 @@ const CONDITIONAL = 3
 const DATA_COLLECTION = 4
 const USER_INPUT = 5
 
-var activePreset;
 let activeBlock;
+let activePreset;
 
 class MessageWidget {
     constructor(position = "bottom-right") {
