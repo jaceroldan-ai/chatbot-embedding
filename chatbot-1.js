@@ -509,13 +509,14 @@ class MessageWidget {
             messageRecipient.appendChild(recipientIconContainer);
             messageRecipient.appendChild(recipientMessage);
             messageThread.appendChild(messageRecipient);
+            this.scrolltoBottom();
+
         }
     }
 
     setupEventListeners() {
         const inputElement = document.getElementById('input');
         const submitButton = document.getElementById('button');
-        
         const handleSubmit = async () => {
             const userInput = inputElement.value.trim();
             if (userInput === '') return;
@@ -558,6 +559,7 @@ class MessageWidget {
         messageSender.appendChild(senderImg);
         messageSender.appendChild(senderMessage);
         messageThread.appendChild(messageSender);
+        this.scrolltoBottom();
     }
     disableInput() {
         let inputElement = document.getElementById('input');
@@ -574,6 +576,10 @@ class MessageWidget {
         submitButton.disabled = false;
     }
 
+    scrolltoBottom() {
+        const chatThread = document.getElementById('thread');
+        chatThread.scrollTop = chatThread.scrollHeight;
+    }
 }
 
 function initializeWidget() {
