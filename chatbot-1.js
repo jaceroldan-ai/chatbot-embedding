@@ -200,6 +200,7 @@ const USER_INPUT = 5
 
 let activeBlock;
 let activePreset;
+let startBlock;
 
 class MessageWidget {
     constructor(position = "bottom-right") {
@@ -424,6 +425,15 @@ class MessageWidget {
             const data = event.data;
             console.log(data);
         }
+
+        this.fetchMessageBlocks().then(activePreset => {
+        this.startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
+        this.setUpMessageBlock(activePreset, this.startBlock);
+        }).catch(error => {
+            console.error(error);
+        });
+        this.setupEventListeners();
+
     }
 
     injectStyles() {
@@ -469,34 +479,29 @@ class MessageWidget {
         })
     }
 
-    async setUpMessageBlock(activePreset) {
+    async setUpMessageBlock(activePreset, block) {
         try {
-            let result = await activePreset;
-            if (!this.activeBlock) {
-                this.activeBlock = result.message_blocks.find(block => block.pk == result.start_node_id);
-            }else{
-                this.activeBlock = result.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
+            if (block){
+                this.activeBlock = block
+            }else {
+                this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
             }
-            if(!this.activeBlock){
-                return
-            }
-
             if (this.activeBlock.type ===FIXED){
                 this.addBotReply(this.activeBlock);
-
             }else{
                 await this.handleUserResponse(this.activeBlock);
             }
-
-            if(!activeBlock?.next){
-                this.setUpMessageBlock(activePreset)
+            if(!this.activeBlock?.next_id){
+                return
             }
+            this.setUpMessageBlock(activePreset)
         } catch (error) {
             console.error(error);
         }
     }
 
     addBotReply(block){
+        this.disableInput()    
         if (block.type === FIXED){
             const messageThread = document.getElementById('thread');
             const messageRecipient = document.createElement('li');
@@ -542,12 +547,13 @@ class MessageWidget {
     }
 
     handleUserResponse() {
+        this.enableInput();
         return new Promise((resolve) => {
             this.pendingResolve = resolve;
         });
     }
 
-    addUserReply(userInput){    
+    addUserReply(userInput){
         const messageThread = document.getElementById('thread');
         const messageSender = document.createElement('li');
         messageSender.className = 'message-sender';
@@ -612,6 +618,21 @@ class MessageWidget {
             req.send(form);
         });
     }
+    disableInput() {
+        let inputElement = document.getElementById('input');
+        let submitButton = document.getElementById('button');
+        inputElement.disabled = true;
+        submitButton.disabled = true;
+    }
+
+    // Method to enable input and button
+    enableInput() {
+        let inputElement = document.getElementById('input');
+        let submitButton = document.getElementById('button');
+        inputElement.disabled = false;
+        submitButton.disabled = false;
+    }
+
 }
 
 function initializeWidget() {
