@@ -200,6 +200,7 @@ const USER_INPUT = 5
 
 let activeBlock;
 let activePreset;
+let startBlock;
 
 class MessageWidget {
     constructor(position = "bottom-right") {
@@ -412,9 +413,14 @@ class MessageWidget {
         buttonEl.classList.add('block');
         buttonEl.innerText = 'Get started!';
 
-        activePreset = this.fetchMessageBlocks();
+        this.fetchMessageBlocks().then(activePreset => {
+        this.startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
+        this.setUpMessageBlock(activePreset, this.startBlock);
+        }).catch(error => {
+            console.error(error);
+        });
         this.setupEventListeners();
-        this.setUpMessageBlock(activePreset);
+
     }
 
     injectStyles() {
@@ -460,28 +466,22 @@ class MessageWidget {
         })
     }
 
-    async setUpMessageBlock(activePreset) {
+    async setUpMessageBlock(activePreset, block) {
         try {
-            let result = await activePreset;
-            if (!this.activeBlock) {
-                this.activeBlock = result.message_blocks.find(block => block.pk == result.start_node_id);
-            }else{
-                this.activeBlock = result.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
+            if (block){
+                this.activeBlock = block
+            }else {
+                this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
             }
-            if(!this.activeBlock){
-                return
-            }
-
             if (this.activeBlock.type ===FIXED){
                 this.addBotReply(this.activeBlock);
-
             }else{
                 await this.handleUserResponse(this.activeBlock);
             }
-
-            if(!activeBlock?.next){
-                this.setUpMessageBlock(activePreset)
+            if(!this.activeBlock?.next_id){
+                return
             }
+            this.setUpMessageBlock(activePreset)
         } catch (error) {
             console.error(error);
         }
