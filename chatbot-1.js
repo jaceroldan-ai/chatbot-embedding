@@ -488,6 +488,7 @@ class MessageWidget {
     }
 
     addBotReply(block){
+        this.disableInput()    
         if (block.type === FIXED){
             const messageThread = document.getElementById('thread');
             const messageRecipient = document.createElement('li');
@@ -533,12 +534,13 @@ class MessageWidget {
     }
 
     handleUserResponse() {
+        this.enableInput();
         return new Promise((resolve) => {
             this.pendingResolve = resolve;
         });
     }
 
-    addUserReply(userInput){    
+    addUserReply(userInput){
         const messageThread = document.getElementById('thread');
         const messageSender = document.createElement('li');
         messageSender.className = 'message-sender';
@@ -557,7 +559,21 @@ class MessageWidget {
         messageSender.appendChild(senderMessage);
         messageThread.appendChild(messageSender);
     }
-    
+    disableInput() {
+        let inputElement = document.getElementById('input');
+        let submitButton = document.getElementById('button');
+        inputElement.disabled = true;
+        submitButton.disabled = true;
+    }
+
+    // Method to enable input and button
+    enableInput() {
+        let inputElement = document.getElementById('input');
+        let submitButton = document.getElementById('button');
+        inputElement.disabled = false;
+        submitButton.disabled = false;
+    }
+
 }
 
 function initializeWidget() {
