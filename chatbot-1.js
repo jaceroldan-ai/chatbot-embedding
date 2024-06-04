@@ -468,17 +468,17 @@ class MessageWidget {
 
     async setUpMessageBlock(activePreset, block) {
         try {
-            if (block){
+            if (block) {
                 this.activeBlock = block
-            }else {
+            } else {
                 this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
             }
-            if (this.activeBlock.type ===FIXED){
+            if (this.activeBlock.type ===FIXED) {
                 this.addBotReply(this.activeBlock);
-            }else{
+            } else {
                 await this.handleUserResponse(this.activeBlock);
             }
-            if(!this.activeBlock?.next_id){
+            if (!this.activeBlock?.next_id) {
                 return
             }
             this.setUpMessageBlock(activePreset)
@@ -489,7 +489,6 @@ class MessageWidget {
 
     addBotReply(block){
         this.disableInput()    
-        if (block.type === FIXED){
             const messageThread = document.getElementById('thread');
             const messageRecipient = document.createElement('li');
             messageRecipient.className = 'message-recepient';
@@ -510,8 +509,6 @@ class MessageWidget {
             messageRecipient.appendChild(recipientMessage);
             messageThread.appendChild(messageRecipient);
             this.scrolltoBottom();
-
-        }
     }
 
     setupEventListeners() {
