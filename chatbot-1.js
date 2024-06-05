@@ -201,6 +201,10 @@ const USER_INPUT = 5
 let activeBlock;
 let activePreset;
 let startBlock;
+let parsedToken = '';
+let isStreaming = false;
+
+const END_OF_COMPLETION_TOKEN = '<end>';
 
 class MessageWidget {
     constructor(position = "bottom-right") {
@@ -421,9 +425,9 @@ class MessageWidget {
         const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${token}`;
         const websocket = new WebSocket(url);
 
-        websocket.onmessage = (event) => {
-            const data = event.data;
-            console.log(data);
+        websocket.onmessage = (message) => {
+            let { payload } = JSON.parse(message.data);
+            this.handleAIGeneration(payload)
         }
 
         this.fetchMessageBlocks().then(activePreset => {
@@ -608,6 +612,7 @@ class MessageWidget {
                 if (this.readyState === 4 && this.status === 200) {
                     try {
                         const response = JSON.parse(this.responseText);
+                        isStreaming = true;
                         resolve(response);
                     } catch(e) {
                         reject(e);
@@ -633,6 +638,29 @@ class MessageWidget {
         submitButton.disabled = false;
     }
 
+    handleAIGeneration(payload) {
+        if (payload?.message && !payload.message.includes('`')) {
+            activeBlock.isRetrying = false;
+            activeBlock.isThinking = false;
+            if (_parseMessage(payload.message)) {
+                activeBlock.content += payload.message;
+            }
+        }
+    }
+
+    _parseMessage(token) {
+        token = token.trim();
+        parsedToken = END_OF_COMPLETION_TOKEN.startsWith(parsedToken + token) ?
+                        parsedToken + token : '';
+
+        if (parsedToken === END_OF_COMPLETION_TOKEN) {
+            isStreaming = false;
+            activeBlock.isPassed = true;
+            return false;
+        }
+
+        return !parsedToken.length;
+    }
 }
 
 function initializeWidget() {
