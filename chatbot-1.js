@@ -481,17 +481,17 @@ class MessageWidget {
 
     async setUpMessageBlock(activePreset, block) {
         try {
-            if (block){
+            if (block) {
                 this.activeBlock = block
-            }else {
+            } else {
                 this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
             }
-            if (this.activeBlock.type ===FIXED){
+            if (this.activeBlock.type ===FIXED) {
                 this.addBotReply(this.activeBlock);
-            }else{
+            } else {
                 await this.handleUserResponse(this.activeBlock);
             }
-            if(!this.activeBlock?.next_id){
+            if (!this.activeBlock?.next_id) {
                 return
             }
             this.setUpMessageBlock(activePreset)
@@ -502,7 +502,6 @@ class MessageWidget {
 
     addBotReply(block){
         this.disableInput()    
-        if (block.type === FIXED){
             const messageThread = document.getElementById('thread');
             const messageRecipient = document.createElement('li');
             messageRecipient.className = 'message-recepient';
@@ -522,13 +521,12 @@ class MessageWidget {
             messageRecipient.appendChild(recipientIconContainer);
             messageRecipient.appendChild(recipientMessage);
             messageThread.appendChild(messageRecipient);
-        }
+            this.scrolltoBottom();
     }
 
     setupEventListeners() {
         const inputElement = document.getElementById('input');
         const submitButton = document.getElementById('button');
-        
         const handleSubmit = async () => {
             const userInput = inputElement.value.trim();
             if (userInput === '') return;
@@ -571,6 +569,7 @@ class MessageWidget {
         messageSender.appendChild(senderImg);
         messageSender.appendChild(senderMessage);
         messageThread.appendChild(messageSender);
+        this.scrolltoBottom();
     }
     
     fetchWebsocketToken() {
@@ -633,6 +632,10 @@ class MessageWidget {
         submitButton.disabled = false;
     }
 
+    scrolltoBottom() {
+        const chatThread = document.getElementById('thread');
+        chatThread.scrollTop = chatThread.scrollHeight;
+    }
 }
 
 function initializeWidget() {
