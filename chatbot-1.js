@@ -200,6 +200,7 @@ const USER_INPUT = 5
 
 let activeBlock;
 let activePreset;
+let startBlock;
 
 class MessageWidget {
     constructor(position = "bottom-right") {
@@ -378,9 +379,14 @@ class MessageWidget {
         buttonEl.classList.add('block');
         buttonEl.innerText = 'Get started!';
 
-        activePreset = this.fetchMessageBlocks();
+        this.fetchMessageBlocks().then(activePreset => {
+        this.startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
+        this.setUpMessageBlock(activePreset, this.startBlock);
+        }).catch(error => {
+            console.error(error);
+        });
         this.setupEventListeners();
-        this.setUpMessageBlock(activePreset);
+
     }
 
     injectStyles() {
@@ -410,7 +416,7 @@ class MessageWidget {
 
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
-            const conversationTemplatePk = 47;
+            const conversationTemplatePk = 67;
             const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
 
             const req = new XMLHttpRequest();
@@ -430,21 +436,16 @@ class MessageWidget {
         })
     }
 
-    async setUpMessageBlock(activePreset) {
+    async setUpMessageBlock(activePreset, block) {
         try {
-            let result = await activePreset;
-            if (!this.activeBlock) {
-                this.activeBlock = result.message_blocks.find(block => block.pk == result.start_node_id);
+            if (block) {
+                this.activeBlock = block
             } else {
-                const nextId = this.conditionalBlock ? this.conditionalBlock.next_id : this.activeBlock.next_id;
-                this.activeBlock = result.message_blocks.find(block => block.pk == nextId);
+                const nextId = this.conditionalBlock ? this.conditionalBlock.next_id : this.activeBlock ? this.activeBlock.next_id : null;
+                this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  nextId);
                 this.conditionalBlock = null;
             }
-            if(!this.activeBlock){
-                return
-            }
-
-            if (this.activeBlock.type ===FIXED){
+            if (this.activeBlock.type ===FIXED) {
                 this.addBotReply(this.activeBlock);
             } else if(this.activeBlock.type === CONDITIONAL) {
                 this.addMessageConditionals(this.activeBlock)
@@ -452,16 +453,17 @@ class MessageWidget {
             } else {
                 await this.handleUserResponse(this.activeBlock);
             }
-
-            if(!activeBlock?.next){
-                this.setUpMessageBlock(activePreset)
+            if (!this.activeBlock?.next_id && !this.conditionalBlock) {
+                return
             }
+            this.setUpMessageBlock(activePreset)
         } catch (error) {
             console.error(error);
         }
     }
 
     addBotReply(block){
+        this.disableInput()
         const messageThread = document.getElementById('thread');
         const messageRecipient = document.createElement('li');
         messageRecipient.className = 'message-recepient';
@@ -481,12 +483,12 @@ class MessageWidget {
         messageRecipient.appendChild(recipientIconContainer);
         messageRecipient.appendChild(recipientMessage);
         messageThread.appendChild(messageRecipient);
+        this.scrolltoBottom();
     }
 
     setupEventListeners() {
         const inputElement = document.getElementById('input');
         const submitButton = document.getElementById('button');
-        
         const handleSubmit = async () => {
             const userInput = inputElement.value.trim();
             if (userInput === '') return;
@@ -505,12 +507,13 @@ class MessageWidget {
     }
 
     handleUserResponse() {
+        this.enableInput();
         return new Promise((resolve) => {
             this.pendingResolve = resolve;
         });
     }
 
-    addUserReply(userInput){    
+    addUserReply(userInput){
         const messageThread = document.getElementById('thread');
         const messageSender = document.createElement('li');
         messageSender.className = 'message-sender';
@@ -528,6 +531,26 @@ class MessageWidget {
         messageSender.appendChild(senderImg);
         messageSender.appendChild(senderMessage);
         messageThread.appendChild(messageSender);
+        this.scrolltoBottom();
+    }
+    disableInput() {
+        let inputElement = document.getElementById('input');
+        let submitButton = document.getElementById('button');
+        inputElement.disabled = true;
+        submitButton.disabled = true;
+    }
+
+    // Method to enable input and button
+    enableInput() {
+        let inputElement = document.getElementById('input');
+        let submitButton = document.getElementById('button');
+        inputElement.disabled = false;
+        submitButton.disabled = false;
+    }
+
+    scrolltoBottom() {
+        const chatThread = document.getElementById('thread');
+        chatThread.scrollTop = chatThread.scrollHeight;
     }
 
     addMessageConditionals(block) {
