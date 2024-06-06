@@ -45,7 +45,7 @@ const styles = `
 
     .widget__container .body .message-thread {
         display: flex;
-        flex-direction: column-reverse;
+        flex-direction: column;
         overflow: hidden auto;
         height: 100%;
         scroll-behavior: smooth;
@@ -192,7 +192,15 @@ const CLOSE_ICON = `
     <i class="icon mdi mdi-close" style="color: white;"></i>
 `;
 
+const FIXED = 1
+const AI_PROMPT = 2
+const CONDITIONAL = 3
+const DATA_COLLECTION = 4
+const USER_INPUT = 5
+
+let activeBlock;
 let activePreset;
+let startBlock;
 
 class MessageWidget {
     constructor(position = "bottom-right") {
@@ -290,8 +298,47 @@ class MessageWidget {
 
         const body = document.createElement('section');
         body.className = 'body';
+        body.setAttribute('id', 'body')
         const messageThread = document.createElement('ul');
+        messageThread.setAttribute('id', 'thread')
         messageThread.className = 'message-thread';
+
+
+        const messageRecipient = document.createElement('li');
+        messageRecipient.className = 'message-recepient';
+        const recipientIconContainer = document.createElement('div');
+        recipientIconContainer.className = 'icon-container';
+        const recipientIcon = document.createElement('i');
+        recipientIcon.className = 'mdi mdi-creation mdi-24px';
+        recipientIconContainer.appendChild(recipientIcon);
+        const recipientMessage = document.createElement('div');
+        recipientMessage.className = 'message';
+        const recipientMessageHeader = document.createElement('p');
+        recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
+        const recipientMessageText = document.createElement('p');
+        recipientMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
+        recipientMessage.appendChild(recipientMessageHeader);
+        recipientMessage.appendChild(recipientMessageText);
+        messageRecipient.appendChild(recipientIconContainer);
+        messageRecipient.appendChild(recipientMessage);
+        messageThread.appendChild(messageRecipient);
+
+        const messageSender = document.createElement('li');
+        messageSender.className = 'message-sender';
+        // const senderImg = document.createElement('img');
+        const senderImg = document.createElement('i')
+        senderImg.className = 'mdi mdi-account mdi-24px';
+        const senderMessage = document.createElement('div');
+        senderMessage.className = 'message';
+        const senderMessageHeader = document.createElement('p');
+        senderMessageHeader.innerHTML = '<strong>You</strong>';
+        const senderMessageText = document.createElement('p');
+        senderMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
+        senderMessage.appendChild(senderMessageHeader);
+        senderMessage.appendChild(senderMessageText);
+        messageSender.appendChild(senderImg);
+        messageSender.appendChild(senderMessage);
+        messageThread.appendChild(messageSender);
 
         const messageResponse = document.createElement('li');
         messageResponse.className = 'message-response';
@@ -328,40 +375,6 @@ class MessageWidget {
         messageResponse.appendChild(responseContainer);
         messageThread.appendChild(messageResponse);
 
-        const messageSender = document.createElement('li');
-        messageSender.className = 'message-sender';
-        const senderImg = document.createElement('img');
-        const senderMessage = document.createElement('div');
-        senderMessage.className = 'message';
-        const senderMessageHeader = document.createElement('p');
-        senderMessageHeader.innerHTML = '<strong>You</strong>';
-        const senderMessageText = document.createElement('p');
-        senderMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
-        senderMessage.appendChild(senderMessageHeader);
-        senderMessage.appendChild(senderMessageText);
-        messageSender.appendChild(senderImg);
-        messageSender.appendChild(senderMessage);
-        messageThread.appendChild(messageSender);
-
-        const messageRecipient = document.createElement('li');
-        messageRecipient.className = 'message-recepient';
-        const recipientIconContainer = document.createElement('div');
-        recipientIconContainer.className = 'icon-container';
-        const recipientIcon = document.createElement('i');
-        recipientIcon.className = 'mdi mdi-creation mdi-24px';
-        recipientIconContainer.appendChild(recipientIcon);
-        const recipientMessage = document.createElement('div');
-        recipientMessage.className = 'message';
-        const recipientMessageHeader = document.createElement('p');
-        recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
-        const recipientMessageText = document.createElement('p');
-        recipientMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
-        recipientMessage.appendChild(recipientMessageHeader);
-        recipientMessage.appendChild(recipientMessageText);
-        messageRecipient.appendChild(recipientIconContainer);
-        messageRecipient.appendChild(recipientMessage);
-        messageThread.appendChild(messageRecipient);
-
         body.appendChild(messageThread);
         this.widgetContainer.appendChild(body);
 
@@ -370,6 +383,7 @@ class MessageWidget {
         const messageField = document.createElement('div');
         messageField.className = 'message-field';
         const textArea = document.createElement('textarea');
+        textArea.setAttribute('id', 'input')
         textArea.placeholder = 'Enter message';
         textArea.rows = 10;
         textArea.className = 'block';
@@ -377,6 +391,7 @@ class MessageWidget {
         actions.className = 'actions';
         const sendButton = document.createElement('button');
         sendButton.className = 'send-button accent iconic rounded';
+        sendButton.setAttribute('id', 'button');
         const sendIcon = document.createElement('i');
         sendIcon.className = 'mdi mdi-send mdi-18px';
         sendButton.appendChild(sendIcon);
@@ -398,7 +413,14 @@ class MessageWidget {
         buttonEl.classList.add('block');
         buttonEl.innerText = 'Get started!';
 
-        this.fetchMessageBlocks();
+        this.fetchMessageBlocks().then(activePreset => {
+        this.startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
+        this.setUpMessageBlock(activePreset, this.startBlock);
+        }).catch(error => {
+            console.error(error);
+        });
+        this.setupEventListeners();
+
     }
 
     injectStyles() {
@@ -424,7 +446,7 @@ class MessageWidget {
 
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
-            const conversationTemplatePk = 1;
+            const conversationTemplatePk = 68;
             const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
 
             const req = new XMLHttpRequest();
@@ -442,6 +464,118 @@ class MessageWidget {
             req.open('GET', url);
             req.send();
         })
+    }
+
+    async setUpMessageBlock(activePreset, block) {
+        try {
+            if (block) {
+                this.activeBlock = block
+            } else {
+                this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
+            }
+            if (this.activeBlock.type ===FIXED) {
+                this.addBotReply(this.activeBlock);
+            } else {
+                await this.handleUserResponse(this.activeBlock);
+            }
+            if (!this.activeBlock?.next_id) {
+                return
+            }
+            this.setUpMessageBlock(activePreset)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    addBotReply(block){
+        this.disableInput()    
+            const messageThread = document.getElementById('thread');
+            const messageRecipient = document.createElement('li');
+            messageRecipient.className = 'message-recepient';
+            const recipientIconContainer = document.createElement('div');
+            recipientIconContainer.className = 'icon-container';
+            const recipientIcon = document.createElement('i');
+            recipientIcon.className = 'mdi mdi-creation mdi-24px';
+            recipientIconContainer.appendChild(recipientIcon);
+            const recipientMessage = document.createElement('div');
+            recipientMessage.className = 'message';
+            const recipientMessageHeader = document.createElement('p');
+            recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
+            const recipientMessageText = document.createElement('p');
+            recipientMessageText.textContent = block.text;
+            recipientMessage.appendChild(recipientMessageHeader);
+            recipientMessage.appendChild(recipientMessageText);
+            messageRecipient.appendChild(recipientIconContainer);
+            messageRecipient.appendChild(recipientMessage);
+            messageThread.appendChild(messageRecipient);
+            this.scrolltoBottom();
+    }
+
+    setupEventListeners() {
+        const inputElement = document.getElementById('input');
+        const submitButton = document.getElementById('button');
+        const handleSubmit = async () => {
+            const userInput = inputElement.value.trim();
+            if (userInput === '') return;
+            inputElement.value = '';
+            await this.addUserReply(userInput);
+            this.pendingResolve(userInput); // Resolve the pending promise
+        };
+
+        submitButton.addEventListener('click', handleSubmit);
+        inputElement.addEventListener('keypress', async (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default enter behavior
+                handleSubmit();
+            }
+        });
+    }
+
+    handleUserResponse() {
+        this.enableInput();
+        return new Promise((resolve) => {
+            this.pendingResolve = resolve;
+        });
+    }
+
+    addUserReply(userInput){
+        const messageThread = document.getElementById('thread');
+        const messageSender = document.createElement('li');
+        messageSender.className = 'message-sender';
+        // const senderImg = document.createElement('img');
+        const senderImg = document.createElement('i')
+        senderImg.className = 'mdi mdi-account mdi-24px';
+        const senderMessage = document.createElement('div');
+        senderMessage.className = 'message';
+        const senderMessageHeader = document.createElement('p');
+        senderMessageHeader.innerHTML = '<strong>You</strong>';
+        const senderMessageText = document.createElement('p');
+        senderMessageText.textContent = userInput;
+        senderMessage.appendChild(senderMessageHeader);
+        senderMessage.appendChild(senderMessageText);
+        messageSender.appendChild(senderImg);
+        messageSender.appendChild(senderMessage);
+        messageThread.appendChild(messageSender);
+        this.scrolltoBottom();
+    }
+    disableInput() {
+        let inputElement = document.getElementById('input');
+        let submitButton = document.getElementById('button');
+        inputElement.disabled = true;
+        submitButton.disabled = true;
+    }
+
+    // Method to enable input and button
+    enableInput() {
+        let inputElement = document.getElementById('input');
+        let submitButton = document.getElementById('button');
+        inputElement.disabled = false;
+        submitButton.disabled = false;
+    }
+
+    scrolltoBottom() {
+        const chatThread = document.getElementById('thread');
+        chatThread.scrollTop = chatThread.scrollHeight;
     }
 }
 
