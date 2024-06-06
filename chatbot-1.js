@@ -423,7 +423,6 @@ class MessageWidget {
 
         websocket.onmessage = (event) => {
             const data = event.data;
-            console.log(data);
         }
 
         this.fetchMessageBlocks().then(activePreset => {
@@ -593,13 +592,13 @@ class MessageWidget {
         });
     }
 
-    fetchAiCompletion() {
+    fetchAiCompletion(token) {
         return new Promise((resolve, reject) => {
             const url = `http://localhost:8000/board/ai-completion`
             const form = new FormData();
             const req = new XMLHttpRequest();
 
-            form.append('auth_token', 'token');
+            form.append('auth_token', token);
             form.append('current_state_pk', activeBlock.pk);
             form.append('messages', JSON.stringify(['message']));
 
