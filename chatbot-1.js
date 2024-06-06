@@ -379,6 +379,18 @@ class MessageWidget {
         buttonEl.classList.add('block');
         buttonEl.innerText = 'Get started!';
 
+        activePreset = await this.fetchMessageBlocks();
+        this.setupEventListeners();
+        this.setUpMessageBlock(activePreset);
+
+        const token = await this.fetchWebsocketToken();
+        const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${token}`;
+        const websocket = new WebSocket(url);
+
+        websocket.onmessage = (event) => {
+            const data = event.data;
+        }
+
         this.fetchMessageBlocks().then(activePreset => {
         this.startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
         this.setUpMessageBlock(activePreset, this.startBlock);
@@ -532,6 +544,52 @@ class MessageWidget {
         messageSender.appendChild(senderMessage);
         messageThread.appendChild(messageSender);
         this.scrolltoBottom();
+    }
+    
+    fetchWebsocketToken() {
+        return new Promise((resolve, reject) => {
+            const token = crypto.randomUUID();
+            const url = `http://localhost:8000/websocket-boards-chatbot-token/?token=${token}`;
+            const req = new XMLHttpRequest();
+
+            req.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    try {
+                        const response = JSON.parse(this.responseText);
+                        resolve(response.token);
+                    } catch(e) {
+                        reject(e);
+                    }
+                }
+            }
+            req.open('GET', url);
+            req.send();
+        });
+    }
+
+    fetchAiCompletion(token) {
+        return new Promise((resolve, reject) => {
+            const url = `http://localhost:8000/board/ai-completion`
+            const form = new FormData();
+            const req = new XMLHttpRequest();
+
+            form.append('auth_token', token);
+            form.append('current_state_pk', activeBlock.pk);
+            form.append('messages', JSON.stringify(['message']));
+
+            req.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    try {
+                        const response = JSON.parse(this.responseText);
+                        resolve(response);
+                    } catch(e) {
+                        reject(e);
+                    }
+                }
+            }
+            req.open('POST', url);
+            req.send(form);
+        });
     }
     disableInput() {
         let inputElement = document.getElementById('input');
