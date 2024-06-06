@@ -574,7 +574,7 @@ class MessageWidget {
     
     fetchWebsocketToken() {
         return new Promise((resolve, reject) => {
-            const token = 'localhost';
+            const token = crypto.randomUUID();
             const url = `http://localhost:8000/websocket-boards-chatbot-token/?token=${token}`;
             const req = new XMLHttpRequest();
 
