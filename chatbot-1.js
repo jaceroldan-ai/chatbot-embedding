@@ -213,6 +213,7 @@ class MessageWidget {
     position = "";
     open = false;
     widgetContainer = null;
+    conditionalBlock = null;
 
     getPosition(position) {
         const [vertical, horizontal] = position.split("-");
@@ -340,41 +341,6 @@ class MessageWidget {
         messageSender.appendChild(senderMessage);
         messageThread.appendChild(messageSender);
 
-        const messageResponse = document.createElement('li');
-        messageResponse.className = 'message-response';
-        const responseText = document.createElement('p');
-        responseText.className = 'bold c-tertiary';
-        responseText.textContent = 'Select your response:';
-        messageResponse.appendChild(responseText);
-
-        const responseContainer = document.createElement('div');
-        responseContainer.className = 'response-container';
-
-        const responseButton1 = document.createElement('div');
-        responseButton1.className = 'response';
-        responseButton1.setAttribute('role', 'button');
-        const responseIcon1 = document.createElement('i');
-        responseIcon1.className = 'mdi mdi-comment-text-outline mdi-18px';
-        const responseText1 = document.createElement('p');
-        responseText1.textContent = 'Response';
-        responseButton1.appendChild(responseIcon1);
-        responseButton1.appendChild(responseText1);
-
-        const responseButton2 = document.createElement('div');
-        responseButton2.className = 'response';
-        responseButton2.setAttribute('role', 'button');
-        const responseIcon2 = document.createElement('i');
-        responseIcon2.className = 'mdi mdi-sync mdi-18px';
-        const responseText2 = document.createElement('p');
-        responseText2.textContent = 'Regenerate';
-        responseButton2.appendChild(responseIcon2);
-        responseButton2.appendChild(responseText2);
-
-        responseContainer.appendChild(responseButton1);
-        responseContainer.appendChild(responseButton2);
-        messageResponse.appendChild(responseContainer);
-        messageThread.appendChild(messageResponse);
-
         body.appendChild(messageThread);
         this.widgetContainer.appendChild(body);
 
@@ -441,12 +407,16 @@ class MessageWidget {
             this.closeIcon.classList.add("widget__hidden");
             this.widgetContainer.classList.add("widget__hidden");
             this.widgetContainer.innerHTML = '';
+            if (this.widgetContainer) {
+                document.body.removeChild(this.widgetContainer);
+                this.widgetContainer = null;
+            }
         }
     }
 
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
-            const conversationTemplatePk = 68;
+            const conversationTemplatePk = 67;
             const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
 
             const req = new XMLHttpRequest();
@@ -471,14 +441,19 @@ class MessageWidget {
             if (block) {
                 this.activeBlock = block
             } else {
-                this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  (this.activeBlock ? this.activeBlock.next_id : null));
+                const nextId = this.conditionalBlock ? this.conditionalBlock.next_id : this.activeBlock ? this.activeBlock.next_id : null;
+                this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  nextId);
+                this.conditionalBlock = null;
             }
             if (this.activeBlock.type ===FIXED) {
                 this.addBotReply(this.activeBlock);
+            } else if(this.activeBlock.type === CONDITIONAL) {
+                this.addMessageConditionals(this.activeBlock)
+                await this.handleUserResponse(this.activeBlock);
             } else {
                 await this.handleUserResponse(this.activeBlock);
             }
-            if (!this.activeBlock?.next_id) {
+            if (!this.activeBlock?.next_id && !this.conditionalBlock) {
                 return
             }
             this.setUpMessageBlock(activePreset)
@@ -488,27 +463,27 @@ class MessageWidget {
     }
 
     addBotReply(block){
-        this.disableInput()    
-            const messageThread = document.getElementById('thread');
-            const messageRecipient = document.createElement('li');
-            messageRecipient.className = 'message-recepient';
-            const recipientIconContainer = document.createElement('div');
-            recipientIconContainer.className = 'icon-container';
-            const recipientIcon = document.createElement('i');
-            recipientIcon.className = 'mdi mdi-creation mdi-24px';
-            recipientIconContainer.appendChild(recipientIcon);
-            const recipientMessage = document.createElement('div');
-            recipientMessage.className = 'message';
-            const recipientMessageHeader = document.createElement('p');
-            recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
-            const recipientMessageText = document.createElement('p');
-            recipientMessageText.textContent = block.text;
-            recipientMessage.appendChild(recipientMessageHeader);
-            recipientMessage.appendChild(recipientMessageText);
-            messageRecipient.appendChild(recipientIconContainer);
-            messageRecipient.appendChild(recipientMessage);
-            messageThread.appendChild(messageRecipient);
-            this.scrolltoBottom();
+        this.disableInput()
+        const messageThread = document.getElementById('thread');
+        const messageRecipient = document.createElement('li');
+        messageRecipient.className = 'message-recepient';
+        const recipientIconContainer = document.createElement('div');
+        recipientIconContainer.className = 'icon-container';
+        const recipientIcon = document.createElement('i');
+        recipientIcon.className = 'mdi mdi-creation mdi-24px';
+        recipientIconContainer.appendChild(recipientIcon);
+        const recipientMessage = document.createElement('div');
+        recipientMessage.className = 'message';
+        const recipientMessageHeader = document.createElement('p');
+        recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
+        const recipientMessageText = document.createElement('p');
+        recipientMessageText.textContent = block.text;
+        recipientMessage.appendChild(recipientMessageHeader);
+        recipientMessage.appendChild(recipientMessageText);
+        messageRecipient.appendChild(recipientIconContainer);
+        messageRecipient.appendChild(recipientMessage);
+        messageThread.appendChild(messageRecipient);
+        this.scrolltoBottom();
     }
 
     setupEventListeners() {
@@ -576,6 +551,50 @@ class MessageWidget {
     scrolltoBottom() {
         const chatThread = document.getElementById('thread');
         chatThread.scrollTop = chatThread.scrollHeight;
+    }
+
+    addMessageConditionals(block) {
+        let conditionals = block.block_conditionals;
+        this.addBotReply(block);
+        const messageThread = document.getElementById('thread');
+
+        const messageResponse = document.createElement('li');
+        messageResponse.className = 'message-response';
+
+        const responseText = document.createElement('p');
+        responseText.className = 'bold c-tertiary';
+        responseText.textContent = 'Select your response:';
+        messageResponse.appendChild(responseText);
+
+        const responseContainer = document.createElement('div');
+        responseContainer.className = 'response-container';
+
+        conditionals.forEach(conditional => {
+            const responseButton = document.createElement('div');
+            responseButton.className = 'response';
+            responseButton.setAttribute('role', 'button');
+
+            const responseIcon = document.createElement('i');
+            responseIcon.className = 'mdi mdi-comment-text-outline mdi-18px';
+
+            const responseText = document.createElement('p');
+            responseText.textContent = conditional.text;
+
+            responseButton.appendChild(responseIcon);
+            responseButton.appendChild(responseText);
+
+            responseButton.addEventListener('click', () => {
+                this.conditionalBlock = conditional;
+                messageThread.removeChild(messageResponse);
+
+                this.addUserReply(responseText.textContent);
+                this.pendingResolve(responseText.textContent);
+            });
+            responseContainer.appendChild(responseButton);
+        });
+
+        messageResponse.appendChild(responseContainer);
+        messageThread.appendChild(messageResponse);
     }
 }
 
