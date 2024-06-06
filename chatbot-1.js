@@ -665,7 +665,7 @@ class MessageWidget {
         if (payload?.message && !payload.message.includes('`')) {
             activeBlock.isRetrying = false;
             activeBlock.isThinking = false;
-            if (_parseMessage(payload.message)) {
+            if (this._parseMessage(payload.message)) {
                 activeBlock.content += payload.message;
             }
         }
