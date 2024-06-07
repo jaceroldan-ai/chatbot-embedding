@@ -309,41 +309,41 @@ class MessageWidget {
         messageThread.className = 'message-thread';
 
 
-        const messageRecipient = document.createElement('li');
-        messageRecipient.className = 'message-recepient';
-        const recipientIconContainer = document.createElement('div');
-        recipientIconContainer.className = 'icon-container';
-        const recipientIcon = document.createElement('i');
-        recipientIcon.className = 'mdi mdi-creation mdi-24px';
-        recipientIconContainer.appendChild(recipientIcon);
-        const recipientMessage = document.createElement('div');
-        recipientMessage.className = 'message';
-        const recipientMessageHeader = document.createElement('p');
-        recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
-        const recipientMessageText = document.createElement('p');
-        recipientMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
-        recipientMessage.appendChild(recipientMessageHeader);
-        recipientMessage.appendChild(recipientMessageText);
-        messageRecipient.appendChild(recipientIconContainer);
-        messageRecipient.appendChild(recipientMessage);
-        messageThread.appendChild(messageRecipient);
+        // const messageRecipient = document.createElement('li');
+        // messageRecipient.className = 'message-recepient';
+        // const recipientIconContainer = document.createElement('div');
+        // recipientIconContainer.className = 'icon-container';
+        // const recipientIcon = document.createElement('i');
+        // recipientIcon.className = 'mdi mdi-creation mdi-24px';
+        // recipientIconContainer.appendChild(recipientIcon);
+        // const recipientMessage = document.createElement('div');
+        // recipientMessage.className = 'message';
+        // const recipientMessageHeader = document.createElement('p');
+        // recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
+        // const recipientMessageText = document.createElement('p');
+        // recipientMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
+        // recipientMessage.appendChild(recipientMessageHeader);
+        // recipientMessage.appendChild(recipientMessageText);
+        // messageRecipient.appendChild(recipientIconContainer);
+        // messageRecipient.appendChild(recipientMessage);
+        // messageThread.appendChild(messageRecipient);
 
-        const messageSender = document.createElement('li');
-        messageSender.className = 'message-sender';
-        // const senderImg = document.createElement('img');
-        const senderImg = document.createElement('i')
-        senderImg.className = 'mdi mdi-account mdi-24px';
-        const senderMessage = document.createElement('div');
-        senderMessage.className = 'message';
-        const senderMessageHeader = document.createElement('p');
-        senderMessageHeader.innerHTML = '<strong>You</strong>';
-        const senderMessageText = document.createElement('p');
-        senderMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
-        senderMessage.appendChild(senderMessageHeader);
-        senderMessage.appendChild(senderMessageText);
-        messageSender.appendChild(senderImg);
-        messageSender.appendChild(senderMessage);
-        messageThread.appendChild(messageSender);
+        // const messageSender = document.createElement('li');
+        // messageSender.className = 'message-sender';
+        // // const senderImg = document.createElement('img');
+        // const senderImg = document.createElement('i')
+        // senderImg.className = 'mdi mdi-account mdi-24px';
+        // const senderMessage = document.createElement('div');
+        // senderMessage.className = 'message';
+        // const senderMessageHeader = document.createElement('p');
+        // senderMessageHeader.innerHTML = '<strong>You</strong>';
+        // const senderMessageText = document.createElement('p');
+        // senderMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
+        // senderMessage.appendChild(senderMessageHeader);
+        // senderMessage.appendChild(senderMessageText);
+        // messageSender.appendChild(senderImg);
+        // messageSender.appendChild(senderMessage);
+        // messageThread.appendChild(messageSender);
 
         body.appendChild(messageThread);
         this.widgetContainer.appendChild(body);
