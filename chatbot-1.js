@@ -666,7 +666,10 @@ class MessageWidget {
             activeBlock.isRetrying = false;
             activeBlock.isThinking = false;
             if (this._parseMessage(payload.message)) {
-                activeBlock.content += payload.message;
+                activeBlock.text += payload.message;
+                if (isStreaming === false) {
+                    this.addBotReply(activeBlock);
+                }
             }
         }
     }
