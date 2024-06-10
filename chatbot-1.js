@@ -203,6 +203,9 @@ let activePreset;
 let startBlock;
 let parsedToken = '';
 let isStreaming = false;
+let dataCollectedBlock = 0;
+let dataCollected = '';
+let cardPayload = {};
 
 const END_OF_COMPLETION_TOKEN = '<end>';
 
@@ -309,41 +312,41 @@ class MessageWidget {
         messageThread.className = 'message-thread';
 
 
-        const messageRecipient = document.createElement('li');
-        messageRecipient.className = 'message-recepient';
-        const recipientIconContainer = document.createElement('div');
-        recipientIconContainer.className = 'icon-container';
-        const recipientIcon = document.createElement('i');
-        recipientIcon.className = 'mdi mdi-creation mdi-24px';
-        recipientIconContainer.appendChild(recipientIcon);
-        const recipientMessage = document.createElement('div');
-        recipientMessage.className = 'message';
-        const recipientMessageHeader = document.createElement('p');
-        recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
-        const recipientMessageText = document.createElement('p');
-        recipientMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
-        recipientMessage.appendChild(recipientMessageHeader);
-        recipientMessage.appendChild(recipientMessageText);
-        messageRecipient.appendChild(recipientIconContainer);
-        messageRecipient.appendChild(recipientMessage);
-        messageThread.appendChild(messageRecipient);
+        // const messageRecipient = document.createElement('li');
+        // messageRecipient.className = 'message-recepient';
+        // const recipientIconContainer = document.createElement('div');
+        // recipientIconContainer.className = 'icon-container';
+        // const recipientIcon = document.createElement('i');
+        // recipientIcon.className = 'mdi mdi-creation mdi-24px';
+        // recipientIconContainer.appendChild(recipientIcon);
+        // const recipientMessage = document.createElement('div');
+        // recipientMessage.className = 'message';
+        // const recipientMessageHeader = document.createElement('p');
+        // recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
+        // const recipientMessageText = document.createElement('p');
+        // recipientMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
+        // recipientMessage.appendChild(recipientMessageHeader);
+        // recipientMessage.appendChild(recipientMessageText);
+        // messageRecipient.appendChild(recipientIconContainer);
+        // messageRecipient.appendChild(recipientMessage);
+        // messageThread.appendChild(messageRecipient);
 
-        const messageSender = document.createElement('li');
-        messageSender.className = 'message-sender';
-        // const senderImg = document.createElement('img');
-        const senderImg = document.createElement('i')
-        senderImg.className = 'mdi mdi-account mdi-24px';
-        const senderMessage = document.createElement('div');
-        senderMessage.className = 'message';
-        const senderMessageHeader = document.createElement('p');
-        senderMessageHeader.innerHTML = '<strong>You</strong>';
-        const senderMessageText = document.createElement('p');
-        senderMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
-        senderMessage.appendChild(senderMessageHeader);
-        senderMessage.appendChild(senderMessageText);
-        messageSender.appendChild(senderImg);
-        messageSender.appendChild(senderMessage);
-        messageThread.appendChild(messageSender);
+        // const messageSender = document.createElement('li');
+        // messageSender.className = 'message-sender';
+        // // const senderImg = document.createElement('img');
+        // const senderImg = document.createElement('i')
+        // senderImg.className = 'mdi mdi-account mdi-24px';
+        // const senderMessage = document.createElement('div');
+        // senderMessage.className = 'message';
+        // const senderMessageHeader = document.createElement('p');
+        // senderMessageHeader.innerHTML = '<strong>You</strong>';
+        // const senderMessageText = document.createElement('p');
+        // senderMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
+        // senderMessage.appendChild(senderMessageHeader);
+        // senderMessage.appendChild(senderMessageText);
+        // messageSender.appendChild(senderImg);
+        // messageSender.appendChild(senderMessage);
+        // messageThread.appendChild(messageSender);
 
         body.appendChild(messageThread);
         this.widgetContainer.appendChild(body);
@@ -384,6 +387,8 @@ class MessageWidget {
         buttonEl.innerText = 'Get started!';
 
         activePreset = await this.fetchMessageBlocks();
+        cardPayload["board_id"]=activePreset.object_id;
+        console.log(activePreset);
         this.setupEventListeners();
         this.setUpMessageBlock(activePreset);
 
@@ -397,8 +402,8 @@ class MessageWidget {
         }
 
         this.fetchMessageBlocks().then(activePreset => {
-        this.startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
-        this.setUpMessageBlock(activePreset, this.startBlock);
+        startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
+        this.setUpMessageBlock(activePreset, startBlock);
         }).catch(error => {
             console.error(error);
         });
@@ -434,14 +439,14 @@ class MessageWidget {
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
             const conversationTemplatePk = 67;
-            const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
-
+            const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-message-blocks/filter/?pk=${conversationTemplatePk}`;
+            
             const req = new XMLHttpRequest();
             req.onreadystatechange = function() {
                 if (this.readyState === 4 && this.status === 200) {
                     try {
                         const response = JSON.parse(this.responseText);
-                        activePreset = response.data.find(preset => preset.is_active);
+                        activePreset = response.data[0]
                         resolve(activePreset);
                     } catch (e) {
                         reject(e);
@@ -459,21 +464,46 @@ class MessageWidget {
                 this.activeBlock = block
             } else {
                 const nextId = this.conditionalBlock ? this.conditionalBlock.next_id : this.activeBlock ? this.activeBlock.next_id : null;
+                if(nextId === activePreset.end_node_id){
+                    this.prepareCardDetails();
+                }
                 this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  nextId);
                 this.conditionalBlock = null;
             }
+
+
             if (this.activeBlock.type ===FIXED) {
                 this.addBotReply(this.activeBlock);
             } else if(this.activeBlock.type === CONDITIONAL) {
                 this.addMessageConditionals(this.activeBlock)
                 await this.handleUserResponse(this.activeBlock);
+            } else if(this.activeBlock.type === DATA_COLLECTION){
+                dataCollected = this.activeBlock.data_collected_kind
+                if (this.activeBlock.data_collected_kind == 'description') {
+                    cardPayload.description_question = this.activeBlock.text;
+                }
+                else if (this.activeBlock.data_collected_kind == 'name') {
+                    cardPayload.name_question = this.activeBlock.text;
+                } else {
+                    cardPayload.others_question = this.activeBlock.text;
+                }
+                this.addBotReply(this.activeBlock)
             } else {
-                await this.handleUserResponse(this.activeBlock);
+                if(dataCollected){
+                    let text = await this.handleUserResponse(this.activeBlock);
+                    cardPayload[dataCollected] = text;
+                    this.dataCollected = null;
+                }else{
+                    await this.handleUserResponse(this.activeBlock);
+                }
             }
             if (!this.activeBlock?.next_id && !this.conditionalBlock) {
                 return
             }
+            // Recursive call
             this.setUpMessageBlock(activePreset)
+
+
         } catch (error) {
             console.error(error);
         }
@@ -666,11 +696,76 @@ class MessageWidget {
             activeBlock.isRetrying = false;
             activeBlock.isThinking = false;
             if (this._parseMessage(payload.message)) {
-                activeBlock.content += payload.message;
+                activeBlock.text += payload.message;
+                if (isStreaming === false) {
+                    this.addBotReply(activeBlock);
+                }
             }
         }
     }
 
+    async submitConcern(payload){
+        const url = `http://localhost:8000/api-sileo/v1/hqzen/command-board-chatbot-internal-card/create/`;
+        const form = new FormData();
+
+        for(let field in payload){
+            form.append(field, payload[field])
+        }
+
+        const response = await fetch(url, {
+            method: "POST", // *GET, POST, PUT, DELETE, etc.
+            body: form, // body data type must match "Content-Type" header
+          });
+          return response.json(); // parses JSON response into native JavaScript objects
+    }
+
+
+    async prepareCardDetails() {
+        let payload = {
+            title: 'User Concern',
+            description: { ops: [] },
+            board_id: activePreset.object_id,
+            total_points: 0,
+            is_public: true,
+            is_group_estimation_enabled: false,
+            date_due: '',
+        };
+
+        if (cardPayload.title) {
+            payload.title = cardPayload.title;
+        }
+        if (cardPayload.name) {
+            payload.description.ops.push(...[{ attributes: { bold: true },
+                                               insert: `${cardPayload.name_question}: ` },
+                                             { insert: `${cardPayload.name ?? 'None'}\n` }]);
+        }
+
+        if (cardPayload.description) {
+            payload.description.ops.push(...[{ attributes: { bold: true },
+                                               insert: `${cardPayload.description_question}: ` },
+                                             { insert: `${cardPayload.description ?? 'None'}\n` }]);
+        }
+
+        if (this.cardPayload?.other) {
+            payload.description.ops.push(...[{ attributes: { bold: true },
+                                               insert: `${cardPayload.others_question}: ` },
+                                             { insert: `${cardPayload.other ?? 'None'}\n` }]);
+        }
+
+        payload.description = JSON.stringify(payload.description);
+
+        if (this.user)
+            payload['issuer'] = this.user.user_profile.pk;
+        this.submitConcern(payload);
+    }
+
+    async createConcernChannel(concernId) {
+        let formData = {
+            alias: 'Issuer',
+            originator: concernId
+        };
+        await this.createCardChannel(formData);
+    }
     _parseMessage(token) {
         token = token.trim();
         parsedToken = END_OF_COMPLETION_TOKEN.startsWith(parsedToken + token) ?
