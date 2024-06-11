@@ -203,6 +203,9 @@ let activePreset;
 let startBlock;
 let parsedToken = '';
 let isStreaming = false;
+let typing = false;
+let text = '';
+let index = 0;
 
 const END_OF_COMPLETION_TOKEN = '<end>';
 
@@ -433,7 +436,7 @@ class MessageWidget {
 
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
-            const conversationTemplatePk = 67;
+            const conversationTemplatePk = 34;
             const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
 
             const req = new XMLHttpRequest();
@@ -494,12 +497,16 @@ class MessageWidget {
         const recipientMessageHeader = document.createElement('p');
         recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
         const recipientMessageText = document.createElement('p');
-        recipientMessageText.textContent = block.text;
+        recipientMessageText.textContent = "";
         recipientMessage.appendChild(recipientMessageHeader);
         recipientMessage.appendChild(recipientMessageText);
         messageRecipient.appendChild(recipientIconContainer);
         messageRecipient.appendChild(recipientMessage);
         messageThread.appendChild(messageRecipient);
+
+        text = block.text;
+        this.typewriter();
+
         this.scrolltoBottom();
     }
 
@@ -686,6 +693,19 @@ class MessageWidget {
         }
 
         return !parsedToken.length;
+    }
+
+    typewriter() {
+        if (index < text.length) {
+            const messageRecepients = document.getElementsByClassName('message-recepient');
+            const messages = messageRecepients[messageRecepients.length - 1].getElementsByClassName('message')[0];
+            const pTags = messages.getElementsByTagName("p");
+            const ptag = pTags[pTags.length - 1];
+            ptag.innerHTML += text.charAt(index);
+
+            index++;
+            setTimeout(this.typewriter, 10)
+        }
     }
 }
 
