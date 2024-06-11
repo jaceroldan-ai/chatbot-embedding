@@ -205,7 +205,6 @@ let parsedToken = '';
 let isStreaming = false;
 let typing = false;
 let text = '';
-let index = 0;
 
 const END_OF_COMPLETION_TOKEN = '<end>';
 
@@ -696,15 +695,14 @@ class MessageWidget {
     }
 
     typewriter() {
-        if (index < text.length) {
-            const messageRecepients = document.getElementsByClassName('message-recepient');
-            const messages = messageRecepients[messageRecepients.length - 1].getElementsByClassName('message')[0];
-            const pTags = messages.getElementsByTagName("p");
-            const ptag = pTags[pTags.length - 1];
-            ptag.innerHTML += text.charAt(index);
-
-            index++;
-            setTimeout(this.typewriter, 10)
+        for (let i = 0; i < text.length; i++) {
+            setTimeout(() => {
+                const messageRecepients = document.getElementsByClassName('message-recepient');
+                const messages = messageRecepients[messageRecepients.length - 1].getElementsByClassName('message')[0];
+                const pTags = messages.getElementsByTagName("p");
+                const ptag = pTags[pTags.length - 1];
+                ptag.innerHTML += text.charAt(i);
+            }, i * 10);
         }
     }
 }
