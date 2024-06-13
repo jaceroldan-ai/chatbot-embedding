@@ -163,6 +163,21 @@ const styles = `
         cursor: pointer;
     }
 
+    .submit-concern{
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        border-radius: 24px;
+        background-color: var(--color-accent);
+        color: var(--color-white);
+    }
+    
+    .submit-concern:hover{
+        background-color: var(--color-accent-hover);
+        cursor: pointer;
+    }
+
     .message-field {
         display: flex;
         flex-direction: column;
@@ -388,7 +403,6 @@ class MessageWidget {
 
         activePreset = await this.fetchMessageBlocks();
         cardPayload["board_id"]=activePreset.object_id;
-        console.log(activePreset);
         this.setupEventListeners();
         this.setUpMessageBlock(activePreset);
 
@@ -464,14 +478,9 @@ class MessageWidget {
                 this.activeBlock = block
             } else {
                 const nextId = this.conditionalBlock ? this.conditionalBlock.next_id : this.activeBlock ? this.activeBlock.next_id : null;
-                if(nextId === activePreset.end_node_id){
-                    this.prepareCardDetails();
-                }
                 this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  nextId);
                 this.conditionalBlock = null;
             }
-
-
             if (this.activeBlock.type ===FIXED) {
                 this.addBotReply(this.activeBlock);
             } else if(this.activeBlock.type === CONDITIONAL) {
@@ -498,6 +507,7 @@ class MessageWidget {
                 }
             }
             if (!this.activeBlock?.next_id && !this.conditionalBlock) {
+                this.showSuccessButton();
                 return
             }
             // Recursive call
@@ -627,6 +637,7 @@ class MessageWidget {
             req.send(form);
         });
     }
+
     disableInput() {
         let inputElement = document.getElementById('input');
         let submitButton = document.getElementById('button');
@@ -689,6 +700,38 @@ class MessageWidget {
 
         messageResponse.appendChild(responseContainer);
         messageThread.appendChild(messageResponse);
+    }
+
+    showSuccessButton(){
+        const messageThread = document.getElementById('thread');
+
+        const messageResponse = document.createElement('li');
+        messageResponse.className = 'message-response';
+        const responseContainer = document.createElement('div');
+        responseContainer.className = 'response-container';
+
+        const responseButton = document.createElement('div');
+        responseButton.className = 'submit-concern';
+        responseButton.setAttribute('role', 'button');
+
+        const responseIcon = document.createElement('i');
+        responseIcon.className = 'mdi mdi-rocket mdi-18px';
+
+        const responseText = document.createElement('p');
+        responseText.textContent = "Submit Concern";
+
+        responseButton.appendChild(responseIcon);
+        responseButton.appendChild(responseText);
+
+        responseButton.addEventListener('click', () => {
+            messageThread.removeChild(messageResponse);
+            this.prepareCardDetails();
+
+        });
+        responseContainer.appendChild(responseButton);        
+        messageResponse.appendChild(responseContainer);
+        messageThread.appendChild(messageResponse);
+        this.scrolltoBottom();
     }
 
     handleAIGeneration(payload) {
@@ -766,6 +809,7 @@ class MessageWidget {
         };
         await this.createCardChannel(formData);
     }
+
     _parseMessage(token) {
         token = token.trim();
         parsedToken = END_OF_COMPLETION_TOKEN.startsWith(parsedToken + token) ?
