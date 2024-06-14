@@ -695,14 +695,15 @@ class MessageWidget {
     }
 
     typewriter() {
+        const messageRecepients = document.getElementsByClassName('message-recepient');
+        const messages = messageRecepients[messageRecepients.length - 1].getElementsByClassName('message')[0];
+        const pTags = messages.getElementsByTagName("p");
+        const ptag = pTags[pTags.length - 1];
+
         for (let i = 0; i < text.length; i++) {
             setTimeout(() => {
-                const messageRecepients = document.getElementsByClassName('message-recepient');
-                const messages = messageRecepients[messageRecepients.length - 1].getElementsByClassName('message')[0];
-                const pTags = messages.getElementsByTagName("p");
-                const ptag = pTags[pTags.length - 1];
                 ptag.innerHTML += text.charAt(i);
-            }, i * 10);
+            }, i * 15);
         }
     }
 }
