@@ -506,7 +506,7 @@ class MessageWidget {
                 }
                 await this.fetchAiCompletion(payload);
             } else {
-                if(dataCollected){
+                if (dataCollected) {
                     let text = await this.handleUserResponse(this.activeBlock);
                     cardPayload[dataCollected] = text;
                     this.dataCollected = null;
