@@ -221,6 +221,7 @@ let isStreaming = false;
 let dataCollectedBlock = 0;
 let dataCollected = '';
 let cardPayload = {};
+let messages = [];
 
 const END_OF_COMPLETION_TOKEN = '<end>';
 
@@ -404,7 +405,6 @@ class MessageWidget {
         activePreset = await this.fetchMessageBlocks();
         cardPayload["board_id"]=activePreset.object_id;
         this.setupEventListeners();
-        this.setUpMessageBlock(activePreset);
 
         this.token = await this.fetchWebsocketToken();
         const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${this.token}`;
@@ -473,6 +473,7 @@ class MessageWidget {
     }
 
     async setUpMessageBlock(activePreset, block) {
+        console.log(block)
         try {
             if (block) {
                 this.activeBlock = block
@@ -500,7 +501,7 @@ class MessageWidget {
             } else if (this.activeBlock.type === AI_PROMPT) {
                 const payload = {
                     pk: this.activeBlock.pk,
-                    messages: this.messages,
+                    messages: messages,
                     token: this.token,
                 }
                 await this.fetchAiCompletion(payload);
@@ -542,7 +543,7 @@ class MessageWidget {
         recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
         const recipientMessageText = document.createElement('p');
         recipientMessageText.textContent = block.text;
-        this.messages.unshift({
+        messages.unshift({
             content: block.text,
             role: 'assistant'
         });
@@ -594,8 +595,8 @@ class MessageWidget {
         senderMessageHeader.innerHTML = '<strong>You</strong>';
         const senderMessageText = document.createElement('p');
         senderMessageText.textContent = userInput;
-        this.messages.unshift({
-            content: block.text,
+        messages.unshift({
+            content: userInput,
             role: 'user'
         });
         senderMessage.appendChild(senderMessageHeader);
@@ -771,10 +772,11 @@ class MessageWidget {
         }
 
         const response = await fetch(url, {
-            method: "POST", // *GET, POST, PUT, DELETE, etc.
-            body: form, // body data type must match "Content-Type" header
+            method: "POST",
+            body: form,
           });
-          return response.json(); // parses JSON response into native JavaScript objects
+          return response.json();
+        
     }
 
 
@@ -812,17 +814,10 @@ class MessageWidget {
 
         payload.description = JSON.stringify(payload.description);
 
-        if (this.user)
-            payload['issuer'] = this.user.user_profile.pk;
         this.submitConcern(payload);
-    }
+        alert("Card Created! Thank you for submitting your concern.")
+        this.toggleOpen();
 
-    async createConcernChannel(concernId) {
-        let formData = {
-            alias: 'Issuer',
-            originator: concernId
-        };
-        await this.createCardChannel(formData);
     }
 
     _parseMessage(token) {
