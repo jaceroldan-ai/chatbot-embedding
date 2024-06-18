@@ -387,8 +387,8 @@ class MessageWidget {
         this.setupEventListeners();
         this.setUpMessageBlock(activePreset);
 
-        const token = await this.fetchWebsocketToken();
-        const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${token}`;
+        this.token = await this.fetchWebsocketToken();
+        const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${this.token}`;
         const websocket = new WebSocket(url);
 
         websocket.onmessage = (message) => {
@@ -467,6 +467,13 @@ class MessageWidget {
             } else if(this.activeBlock.type === CONDITIONAL) {
                 this.addMessageConditionals(this.activeBlock)
                 await this.handleUserResponse(this.activeBlock);
+            } else if (this.activeBlock.type === AI_PROMPT) {
+                const payload = {
+                    pk: this.activeBlock.pk,
+                    messages: this.messages,
+                    token: this.token,
+                }
+                await this.fetchAiCompletion(payload);
             } else {
                 await this.handleUserResponse(this.activeBlock);
             }
@@ -495,6 +502,10 @@ class MessageWidget {
         recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
         const recipientMessageText = document.createElement('p');
         recipientMessageText.textContent = block.text;
+        this.messages.unshift({
+            content: block.text,
+            role: 'assistant'
+        });
         recipientMessage.appendChild(recipientMessageHeader);
         recipientMessage.appendChild(recipientMessageText);
         messageRecipient.appendChild(recipientIconContainer);
@@ -543,6 +554,10 @@ class MessageWidget {
         senderMessageHeader.innerHTML = '<strong>You</strong>';
         const senderMessageText = document.createElement('p');
         senderMessageText.textContent = userInput;
+        this.messages.unshift({
+            content: block.text,
+            role: 'user'
+        });
         senderMessage.appendChild(senderMessageHeader);
         senderMessage.appendChild(senderMessageText);
         messageSender.appendChild(senderImg);
@@ -572,15 +587,15 @@ class MessageWidget {
         });
     }
 
-    fetchAiCompletion(token) {
+    fetchAiCompletion(payload) {
         return new Promise((resolve, reject) => {
             const url = `http://localhost:8000/board/ai-completion`
             const form = new FormData();
             const req = new XMLHttpRequest();
 
-            form.append('auth_token', token);
-            form.append('current_state_pk', activeBlock.pk);
-            form.append('messages', JSON.stringify(['message']));
+            form.append('auth_token', payload.token);
+            form.append('current_state_pk', payload.pk);
+            form.append('messages', JSON.stringify(payload.messages));
 
             req.onreadystatechange = function() {
                 if (this.readyState === 4 && this.status === 200) {
