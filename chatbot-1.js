@@ -432,7 +432,7 @@ class MessageWidget {
 
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
-            const conversationTemplatePk = 34;
+            const conversationTemplatePk = 82;
             const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
 
             const req = new XMLHttpRequest();
@@ -477,13 +477,14 @@ class MessageWidget {
                     token: this.token,
                 }
                 await this.fetchAiCompletion(payload);
+                await this.awaitWebSocketResponse();
             } else {
                 await this.handleUserResponse(this.activeBlock);
             }
             if (!this.activeBlock?.next_id && !this.conditionalBlock) {
                 return
             }
-            // this.setUpMessageBlock(activePreset)
+            this.setUpMessageBlock(activePreset)
         } catch (error) {
             console.error(error);
         }
@@ -504,7 +505,7 @@ class MessageWidget {
         const recipientMessageHeader = document.createElement('p');
         recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
         const recipientMessageText = document.createElement('p');
-        recipientMessageText.textContent = block.text;
+        // recipientMessageText.textContent = block.text;
         if (this.messages) {
             this.messages.unshift({
                 content: block.text,
@@ -563,7 +564,7 @@ class MessageWidget {
         const senderMessageText = document.createElement('p');
         senderMessageText.textContent = userInput;
         this.messages.unshift({
-            content: block.text,
+            content: userInput,
             role: 'user'
         });
         senderMessage.appendChild(senderMessageHeader);
@@ -687,16 +688,29 @@ class MessageWidget {
 
     async handleAIGeneration(payload) {
         if (payload?.message && !payload.message.includes('`')) {
-            activeBlock.isRetrying = false;
-            activeBlock.isThinking = false;
-            if (this._parseMessage(payload.message)) {
-                activeBlock.text += payload.message;
+            if (await this._parseMessage(payload.message)) {
+                this.activeBlock.text += payload.message;
+                console.log(this.activeBlock.text)
+            }else{
                 if (isStreaming === false) {
-                    this.addBotReply(activeBlock);
+                    await this.addBotReply(this.activeBlock);
                     await this.typewriter();
                 }
+
+                setTimeout(() => {
+                    this.pendingResolve(payload.message);
+                }, 2000);
+
             }
+        }else if (this.activeBlock.text === "undefined"){
+            this.activeBlock.text = ""
         }
+    }
+
+    awaitWebSocketResponse(){
+        return new Promise((resolve) => {
+            this.pendingResolve = resolve;
+        });
     }
 
     _parseMessage(token) {
@@ -706,7 +720,7 @@ class MessageWidget {
 
         if (parsedToken === END_OF_COMPLETION_TOKEN) {
             isStreaming = false;
-            activeBlock.isPassed = true;
+            this.activeBlock.isPassed = true;
             return false;
         }
 
@@ -723,7 +737,7 @@ class MessageWidget {
             for (let i = 0; i < text.length; i++) {
                 setTimeout(() => {
                     ptag.innerHTML += text.charAt(i);
-                }, i * 15);
+                }, i * 10);
             }
             resolve();
         });
