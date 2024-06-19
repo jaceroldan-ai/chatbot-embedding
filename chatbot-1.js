@@ -690,7 +690,6 @@ class MessageWidget {
         if (payload?.message && !payload.message.includes('`')) {
             if (await this._parseMessage(payload.message)) {
                 this.activeBlock.text += payload.message;
-                console.log(this.activeBlock.text)
             }else{
                 if (isStreaming === false) {
                     await this.addBotReply(this.activeBlock);
@@ -739,7 +738,9 @@ class MessageWidget {
                     ptag.innerHTML += text.charAt(i);
                 }, i * 10);
             }
-            resolve();
+            setTimeout(() => {  
+                resolve();
+            }, text.length * 10);
         });
     }
 }
