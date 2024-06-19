@@ -698,7 +698,7 @@ class MessageWidget {
 
                 setTimeout(() => {
                     this.pendingResolve(payload.message);
-                }, 2000);
+                }, 1000);
 
             }
         }else if (this.activeBlock.text === "undefined"){
@@ -736,11 +736,11 @@ class MessageWidget {
             for (let i = 0; i < text.length; i++) {
                 setTimeout(() => {
                     ptag.innerHTML += text.charAt(i);
-                }, i * 10);
+                }, i * 8);
             }
             setTimeout(() => {  
                 resolve();
-            }, text.length * 10);
+            }, text.length * 8);
         });
     }
 }
