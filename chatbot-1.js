@@ -203,6 +203,8 @@ let activePreset;
 let startBlock;
 let parsedToken = '';
 let isStreaming = false;
+let typing = false;
+let text = '';
 
 const END_OF_COMPLETION_TOKEN = '<end>';
 
@@ -210,6 +212,8 @@ class MessageWidget {
     constructor(position = "bottom-right") {
         this.position = this.getPosition(position);
         this.open = false;
+        this.messages = [];
+        this.token = "";
         this.initialize();
         this.injectStyles();
     }
@@ -383,10 +387,6 @@ class MessageWidget {
         buttonEl.classList.add('block');
         buttonEl.innerText = 'Get started!';
 
-        activePreset = await this.fetchMessageBlocks();
-        this.setupEventListeners();
-        this.setUpMessageBlock(activePreset);
-
         this.token = await this.fetchWebsocketToken();
         const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${this.token}`;
         const websocket = new WebSocket(url);
@@ -403,7 +403,6 @@ class MessageWidget {
             console.error(error);
         });
         this.setupEventListeners();
-
     }
 
     injectStyles() {
@@ -433,7 +432,7 @@ class MessageWidget {
 
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
-            const conversationTemplatePk = 67;
+            const conversationTemplatePk = 34;
             const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
 
             const req = new XMLHttpRequest();
@@ -458,12 +457,16 @@ class MessageWidget {
             if (block) {
                 this.activeBlock = block
             } else {
-                const nextId = this.conditionalBlock ? this.conditionalBlock.next_id : this.activeBlock ? this.activeBlock.next_id : null;
+                const nextId = this.conditionalBlock ?
+                    this.conditionalBlock.next_id : this.activeBlock ?
+                    this.activeBlock.next_id : activePreset.start_node_id;
+
                 this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  nextId);
                 this.conditionalBlock = null;
             }
             if (this.activeBlock.type ===FIXED) {
                 this.addBotReply(this.activeBlock);
+                await this.typewriter();
             } else if(this.activeBlock.type === CONDITIONAL) {
                 this.addMessageConditionals(this.activeBlock)
                 await this.handleUserResponse(this.activeBlock);
@@ -480,7 +483,7 @@ class MessageWidget {
             if (!this.activeBlock?.next_id && !this.conditionalBlock) {
                 return
             }
-            this.setUpMessageBlock(activePreset)
+            // this.setUpMessageBlock(activePreset)
         } catch (error) {
             console.error(error);
         }
@@ -502,15 +505,20 @@ class MessageWidget {
         recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
         const recipientMessageText = document.createElement('p');
         recipientMessageText.textContent = block.text;
-        this.messages.unshift({
-            content: block.text,
-            role: 'assistant'
-        });
+        if (this.messages) {
+            this.messages.unshift({
+                content: block.text,
+                role: 'assistant'
+            });
+        }
         recipientMessage.appendChild(recipientMessageHeader);
         recipientMessage.appendChild(recipientMessageText);
         messageRecipient.appendChild(recipientIconContainer);
         messageRecipient.appendChild(recipientMessage);
         messageThread.appendChild(messageRecipient);
+
+        text = block.text;
+
         this.scrolltoBottom();
     }
 
@@ -632,9 +640,10 @@ class MessageWidget {
         chatThread.scrollTop = chatThread.scrollHeight;
     }
 
-    addMessageConditionals(block) {
+    async addMessageConditionals(block) {
         let conditionals = block.block_conditionals;
         this.addBotReply(block);
+        await this.typewriter();
         const messageThread = document.getElementById('thread');
 
         const messageResponse = document.createElement('li');
@@ -676,7 +685,7 @@ class MessageWidget {
         messageThread.appendChild(messageResponse);
     }
 
-    handleAIGeneration(payload) {
+    async handleAIGeneration(payload) {
         if (payload?.message && !payload.message.includes('`')) {
             activeBlock.isRetrying = false;
             activeBlock.isThinking = false;
@@ -684,6 +693,7 @@ class MessageWidget {
                 activeBlock.text += payload.message;
                 if (isStreaming === false) {
                     this.addBotReply(activeBlock);
+                    await this.typewriter();
                 }
             }
         }
@@ -701,6 +711,22 @@ class MessageWidget {
         }
 
         return !parsedToken.length;
+    }
+
+    typewriter() {
+        return new Promise((resolve, reject) => {
+            const messageRecepients = document.getElementsByClassName('message-recepient');
+            const messages = messageRecepients[messageRecepients.length - 1].getElementsByClassName('message')[0];
+            const pTags = messages.getElementsByTagName("p");
+            const ptag = pTags[pTags.length - 1];
+    
+            for (let i = 0; i < text.length; i++) {
+                setTimeout(() => {
+                    ptag.innerHTML += text.charAt(i);
+                }, i * 15);
+            }
+            resolve();
+        });
     }
 }
 
