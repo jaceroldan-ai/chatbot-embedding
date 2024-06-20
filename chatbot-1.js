@@ -477,7 +477,7 @@ class MessageWidget {
         );
         document.body.appendChild(containerWrapper);
 
-            // Create a shadow root for the container
+        // Create a shadow root for the container
         const containerShadowRoot = containerWrapper.attachShadow({ mode: 'open' });
         
         const container = document.createElement("div");
@@ -552,10 +552,6 @@ class MessageWidget {
      * This is called every time the form is opened or closed.
      */
      async createWidgetContent() {
-        const appDiv = document.createElement('div');
-        appDiv.id = 'app';
-        document.body.appendChild(appDiv);
-
         this.widgetContainer = document.createElement('div');
         this.widgetContainer.className = 'widget__container';
 
@@ -658,8 +654,6 @@ class MessageWidget {
             this.widgetContainer.classList.add("widget__hidden");
             this.widgetContainer.innerHTML = '';
             if (this.widgetContainer) {
-                const widgetShadowRoot = document.querySelector('div > div:nth-child(2)').shadowRoot;
-                widgetShadowRoot.removeChild(this.widgetContainer);
                 this.widgetContainer = null;
             }
         }
@@ -688,7 +682,7 @@ class MessageWidget {
     }
 
     async setUpMessageBlock(activePreset, block) {
-        // try {
+        try {
             if (block) {
                 this.activeBlock = block
             } else {
@@ -746,12 +740,12 @@ class MessageWidget {
             this.setUpMessageBlock(activePreset)
 
 
-        // } catch (error) {
-        //     console.error(error);
-        // }
+        } catch (error) {
+            console.error(error);
+        }
     }
 
-    addBotReply(block){
+    addBotReply(block) {
         this.removeTypingIndicator()
         const messageThread = this.widgetShadow.getElementById('thread');
         const messageRecipient = document.createElement('li');
@@ -766,7 +760,7 @@ class MessageWidget {
         const recipientMessageHeader = document.createElement('p');
         recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
         const recipientMessageText = document.createElement('p');
-        // recipientMessageText.textContent = block.text;
+
         if (this.messages) {
             this.messages.unshift({
                 content: block.text,
@@ -816,7 +810,6 @@ class MessageWidget {
         const messageThread = this.widgetShadow.getElementById('thread');
         const messageSender = document.createElement('li');
         messageSender.className = 'message-sender';
-        // const senderImg = document.createElement('img');
         const senderImg = document.createElement('i')
         senderImg.className = 'mdi mdi-account mdi-24px';
         const senderMessage = document.createElement('div');
