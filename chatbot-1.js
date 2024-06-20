@@ -1,9 +1,151 @@
 const styles = `
-    @import url('./reset.css');
-    @import url('./components/button.css');
-    @import url('./components/input.css');
-    @import url('./components/select.css');
-    @import url('./components/thumbnail.css');
+    button {
+        outline-color: transparent;
+        border: 1px solid #DDE1E3;
+        background-color: #FFFFFF;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        column-gap: 12px;
+        height: 36px;
+        padding-inline: 12px;
+        min-width: 60px;
+        max-width: max-content;
+        transition-duration: .2s;
+    }
+
+    button.rounded {
+        border-radius: 50%;
+    }
+
+    button.iconic {
+        min-width: unset;
+        max-width: unset;
+        width: 36px;
+        padding-inline: 0;
+    }
+
+    button.iconic svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    button.iconic svg > path {
+        fill: #ED2B42;
+    }
+
+    button:hover {
+        background-color: #EBEDEF;
+        border-color: #BEC5CA;
+        cursor: pointer;
+    }
+
+    button:disabled {
+        background-color: #FAFAFA;
+        border-color: #EBEDEF;
+        color: #DDE1E3;
+        cursor: not-allowed;
+    }
+
+    button.block {
+        min-width: unset;
+        max-width: unset;
+        width: 100%;
+        display: flex;
+    }
+
+    button.accent,
+    button.error {
+        border-color: transparent;
+        color: #FFFFFF;
+    }
+
+    button.accent:disabled,
+    button.error:disabled {
+        color: rgba(white, .75);
+    }
+
+    button.accent {
+        background-color: #008FF5;
+    }
+
+    button.accent:hover {
+        background-color: #0374C7;
+    }
+
+    button.accent:disabled {
+        background-color: #6EBEF9;
+    }
+
+    button.error {
+        background-color: #ED2B42;
+    }
+
+    button.error:hover {
+        background-color: #BF2335;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="time"],
+    textarea {
+        height: 36px;
+        outline: none;
+        background: #FFFFFF;
+        border: 1px solid #DDE1E3;
+        border-radius: 4px;
+        padding-inline: 12px;
+        transition-duration: .2s;
+    }
+
+    textarea {
+        padding-block: 8px;
+        min-height: 96px;
+        resize: vertical;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder,
+    input[type="password"]::placeholder,
+    input[type="number"]::placeholder,
+    input[type="url"]::placeholder,
+    input[type="tel"]::placeholder,
+    input[type="date"]::placeholder,
+    input[type="time"]::placeholder,
+    textarea::placeholder {
+        color: #67747E;
+        opacity: 1;
+    }
+
+    input[type="text"]:hover,
+    input[type="email"]:hover,
+    input[type="password"]:hover,
+    input[type="number"]:hover,
+    input[type="url"]:hover,
+    input[type="tel"]:hover,
+    input[type="date"]:hover,
+    input[type="time"]:hover,
+    textarea:hover {
+        border-color: #BEC5CA;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="number"]:focus,
+    input[type="url"]:focus,
+    input[type="tel"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    textarea:focus {
+        border-color: #008FF5;
+        box-shadow: 0 0 0 2px rgba(0, 143, 245, .25);
+    }
 
     #app {
         max-width: 480px;
@@ -15,26 +157,34 @@ const styles = `
     h3, p, input {
         margin: 0;
         padding: 0;
+        font-size: 14px;
     }
     .widget__container {
         box-shadow: 0 0 18px 8px rgba(0, 0, 0, 0.1), 0 0 32px 32px rgba(0, 0, 0, 0.08);
         width: 400px;
+        height: calc(100vh - 200px);
         overflow: auto;
+        background: white;
         right: 30px;
-        top: 75px;
         bottom: 100px;
         position: absolute;
         transition: max-height .2s ease;
         font-family: Helvetica, Arial ,sans-serif;
-        background-color: var(--color-container);
+        background-color: #FAFAFA;
         border-radius: 10px;
         box-sizing: border-box;
         display: grid;
         grid-template-rows: auto 1fr auto;
     }
+
+    .t-md {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
     .widget__container .header {
         padding: 12px 16px;
-        border-bottom: 1px solid var(--color-border);
+        border-bottom: 1px solid #DDE1E3;
     }
 
     .widget__container .body {
@@ -60,7 +210,7 @@ const styles = `
 
     .widget__container .footer {
         padding: 12px;
-        border-top: 1px solid var(--color-border);
+        border-top: 1px solid  #DDE1E3;
     }
     .widget__icon {
         font-size: 20px;
@@ -125,8 +275,8 @@ const styles = `
         height: 48px;
         width: 48px;
         border-radius: 50%;
-        background-color: var(--color-accent);
-        color: var(--color-white);
+        background-color: #008FF5;
+        color: #FFFFFF;
         flex-shrink: 0;
     }
 
@@ -151,15 +301,15 @@ const styles = `
         gap: 8px;
         padding: 8px;
         border-radius: 24px;
-        border: 1px solid var(--color-accent);
-        background-color: var(--color-accent-highlight);
-        color: var(--color-accent);
+        border: 1px solid  #008FF5;
+        background-color: #DBEDFD;
+        color:  #008FF5;
     }
 
     .response:hover {
-        background-color: var(--color-accent-highlight-hover);
-        border-color: var(--color-accent-hover);
-        color: var(--color-accent-hover);
+        background-color: #A4D6FB;
+        border-color: #A4D6FB;
+        color: #A4D6FB;
         cursor: pointer;
     }
 
@@ -169,12 +319,12 @@ const styles = `
         gap: 8px;
         padding: 12px;
         border-radius: 24px;
-        background-color: var(--color-accent);
-        color: var(--color-white);
+        background-color: #008FF5;
+        color: #FFFFFF;
     }
-    
+
     .submit-concern:hover{
-        background-color: var(--color-accent-hover);
+        background-color: #A4D6FB;
         cursor: pointer;
     }
 
@@ -192,7 +342,7 @@ const styles = `
         align-items: center;
         justify-content: space-between;
         border-radius: 0 0 4px 4px;
-        border: 1px solid var(--color-border);
+        border: 1px solid  #DDE1E3;
         border-top-color: transparent;
         padding: 8px 12px;
     }
@@ -222,7 +372,7 @@ const styles = `
     .typing {
         display: flex;
         align-items: center;
-        height: 20px;
+        height: 8px;
         background-color: #EDF7FE;
         border-radius: 20px;
         padding: 6px 10px;
@@ -262,6 +412,7 @@ const styles = `
         font-size: 14px;
         color: #67747E;
     }
+
 `;
 
 const MESSAGE_ICON = `
@@ -299,7 +450,6 @@ class MessageWidget {
         this.messages = [];
         this.token = "";
         this.initialize();
-        this.injectStyles();
     }
 
     position = "";
@@ -317,14 +467,27 @@ class MessageWidget {
 
     async initialize() {
         /**
-         * Create and append a div element to the document body
+         * Create and append a shadow root element to the document body
          */
-        const container = document.createElement("div");
-        container.style.position = "fixed";
+        const containerWrapper = document.createElement("div");
+        containerWrapper.style.position = "fixed";
+        containerWrapper.style.zIndex = 999;
         Object.keys(this.position).forEach(
-        (key) => (container.style[key] = this.position[key])
+            (key) => (containerWrapper.style[key] = this.position[key])
         );
-        document.body.appendChild(container);
+        document.body.appendChild(containerWrapper);
+
+            // Create a shadow root for the container
+        const containerShadowRoot = containerWrapper.attachShadow({ mode: 'open' });
+        
+        const container = document.createElement("div");
+        containerShadowRoot.appendChild(container);
+        /**
+         * Create a shadow root for the button
+         */
+        const buttonShadowRoot = document.createElement("div");
+        container.appendChild(buttonShadowRoot);
+        const buttonShadow = buttonShadowRoot.attachShadow({ mode: 'open' });
 
         /**
          * Create a button element and give it a class of button__container
@@ -335,7 +498,7 @@ class MessageWidget {
         /**
          * Create a span element for the widget icon, give it a class of `widget__icon`, and update its innerHTML property to an icon that would serve as the widget icon.
          */
-        buttonContainer.style = "display: flex; align-items: center; justify-content: center;"
+        buttonContainer.style = "display: flex; align-items: center; justify-content: center;";
         const widgetIconElement = document.createElement("span");
         widgetIconElement.innerHTML = MESSAGE_ICON;
         widgetIconElement.classList.add("widget__icon");
@@ -357,23 +520,38 @@ class MessageWidget {
         buttonContainer.addEventListener("click", this.toggleOpen.bind(this));
 
         /**
+         * Append the button to the button's shadow root
+         */
+        buttonShadow.appendChild(buttonContainer);
+
+        /**
+         * Create a shadow root for the widget container
+         */
+        const widgetShadowRoot = document.createElement("div");
+        container.appendChild(widgetShadowRoot);
+        this.widgetShadow = widgetShadowRoot.attachShadow({ mode: 'open' });
+
+        /**
          * Create a container for the widget and add the following classes:- `widget__hidden`, `widget__container`
          */
         this.widgetContainer = document.createElement("div");
         this.widgetContainer.classList.add("widget__hidden", "widget__container");
-    
+
         /**
-         * Append the widget's content and the button to the container
-        */
-        container.appendChild(this.widgetContainer);
-        container.appendChild(buttonContainer);
+         * Append the widget's content to the widget's shadow root
+         */
+        this.widgetShadow.appendChild(this.widgetContainer);
+        this.injectStyles(buttonShadow);
+        this.injectStyles(this.widgetShadow);
+        this.injectStyles(containerShadowRoot)
     }
+
 
     /**
      * Fetch and construct the form.
      * This is called every time the form is opened or closed.
      */
-    async createWidgetContent() {
+     async createWidgetContent() {
         const appDiv = document.createElement('div');
         appDiv.id = 'app';
         document.body.appendChild(appDiv);
@@ -384,16 +562,16 @@ class MessageWidget {
         const header = document.createElement('header');
         header.className = 'header';
         const headerText = document.createElement('p');
-        headerText.className = 't-md bold';
+        headerText.classList.add('t-md', 'bold');
         headerText.textContent = 'Chat with Zenbot';
         header.appendChild(headerText);
         this.widgetContainer.appendChild(header);
 
         const body = document.createElement('section');
         body.className = 'body';
-        body.setAttribute('id', 'body')
+        body.setAttribute('id', 'body');
         const messageThread = document.createElement('ul');
-        messageThread.setAttribute('id', 'thread')
+        messageThread.setAttribute('id', 'thread');
         messageThread.className = 'message-thread';
 
         body.appendChild(messageThread);
@@ -404,7 +582,7 @@ class MessageWidget {
         const messageField = document.createElement('div');
         messageField.className = 'message-field';
         const textArea = document.createElement('textarea');
-        textArea.setAttribute('id', 'input')
+        textArea.setAttribute('id', 'input');
         textArea.placeholder = 'Enter message';
         textArea.rows = 10;
         textArea.className = 'block';
@@ -422,7 +600,6 @@ class MessageWidget {
         footer.appendChild(messageField);
         this.widgetContainer.appendChild(footer);
 
-        document.body.appendChild(this.widgetContainer);
         // Banner container setup
         const headerContainer = document.createElement('header');
         // headerContainer.appendChild(bannerImageEl);
@@ -434,28 +611,38 @@ class MessageWidget {
         buttonEl.classList.add('block');
         buttonEl.innerText = 'Get started!';
 
+        // Attach the widget content to its shadow root
+        this.widgetShadow.appendChild(this.widgetContainer);
+
         this.token = await this.fetchWebsocketToken();
         const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${this.token}`;
         const websocket = new WebSocket(url);
 
         websocket.onmessage = (message) => {
             let { payload } = JSON.parse(message.data);
-            this.handleAIGeneration(payload)
-        }
+            this.handleAIGeneration(payload);
+        };
 
         this.fetchMessageBlocks().then(activePreset => {
-        startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
-        this.setUpMessageBlock(activePreset, startBlock);
+            startBlock = activePreset.message_blocks.find(block => block.pk == activePreset.start_node_id);
+            this.setUpMessageBlock(activePreset, startBlock);
         }).catch(error => {
             console.error(error);
         });
-        this.setupEventListeners();
+        this.setupEventListeners(this.widgetShadow);
     }
 
-    injectStyles() {
+    injectStyles(shadowRoot) {
         const styleTag = document.createElement("style");
         styleTag.innerHTML = styles.replace(/^\s+|\n/gm, "");
-        document.head.appendChild(styleTag);
+        shadowRoot.appendChild(styleTag);
+        const mdiStylesheet = document.createElement('link');
+        mdiStylesheet.rel = 'stylesheet';
+        mdiStylesheet.href = 'https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.4.47/css/materialdesignicons.css';
+        mdiStylesheet.integrity = 'sha512-/bZeHtNhCNHsuODhywlz53PIfvrJbAmm7MUXWle/f8ro40mVNkPLz0I5VdiYyV030zepbBdMIty0Z3PRwjnfmg==';
+        mdiStylesheet.crossOrigin = 'anonymous';
+        mdiStylesheet.referrerPolicy = 'no-referrer';
+        shadowRoot.appendChild(mdiStylesheet);
     }
 
     toggleOpen() {
@@ -471,7 +658,8 @@ class MessageWidget {
             this.widgetContainer.classList.add("widget__hidden");
             this.widgetContainer.innerHTML = '';
             if (this.widgetContainer) {
-                document.body.removeChild(this.widgetContainer);
+                const widgetShadowRoot = document.querySelector('div > div:nth-child(2)').shadowRoot;
+                widgetShadowRoot.removeChild(this.widgetContainer);
                 this.widgetContainer = null;
             }
         }
@@ -500,7 +688,7 @@ class MessageWidget {
     }
 
     async setUpMessageBlock(activePreset, block) {
-        try {
+        // try {
             if (block) {
                 this.activeBlock = block
             } else {
@@ -558,14 +746,14 @@ class MessageWidget {
             this.setUpMessageBlock(activePreset)
 
 
-        } catch (error) {
-            console.error(error);
-        }
+        // } catch (error) {
+        //     console.error(error);
+        // }
     }
 
     addBotReply(block){
         this.removeTypingIndicator()
-        const messageThread = document.getElementById('thread');
+        const messageThread = this.widgetShadow.getElementById('thread');
         const messageRecipient = document.createElement('li');
         messageRecipient.className = 'message-recepient';
         const recipientIconContainer = document.createElement('div');
@@ -596,9 +784,9 @@ class MessageWidget {
         this.scrolltoBottom();
     }
 
-    setupEventListeners() {
-        const inputElement = document.getElementById('input');
-        const submitButton = document.getElementById('button');
+    setupEventListeners(shadowRoot) {
+        const inputElement = shadowRoot.getElementById('input');
+        const submitButton = shadowRoot.getElementById('button');
         const handleSubmit = async () => {
             const userInput = inputElement.value.trim();
             if (userInput === '') return;
@@ -625,7 +813,7 @@ class MessageWidget {
     }
 
     addUserReply(userInput){
-        const messageThread = document.getElementById('thread');
+        const messageThread = this.widgetShadow.getElementById('thread');
         const messageSender = document.createElement('li');
         messageSender.className = 'message-sender';
         // const senderImg = document.createElement('img');
@@ -648,7 +836,7 @@ class MessageWidget {
         messageThread.appendChild(messageSender);
         this.scrolltoBottom();
     }
-    
+
     fetchWebsocketToken() {
         return new Promise((resolve, reject) => {
             const token = crypto.randomUUID();
@@ -697,22 +885,22 @@ class MessageWidget {
     }
 
     disableInput() {
-        let inputElement = document.getElementById('input');
-        let submitButton = document.getElementById('button');
+        let inputElement = this.widgetShadow.getElementById('input');
+        let submitButton = this.widgetShadow.getElementById('button');
         inputElement.disabled = true;
         submitButton.disabled = true;
     }
 
     // Method to enable input and button
     enableInput() {
-        let inputElement = document.getElementById('input');
-        let submitButton = document.getElementById('button');
+        let inputElement = this.widgetShadow.getElementById('input');
+        let submitButton = this.widgetShadow.getElementById('button');
         inputElement.disabled = false;
         submitButton.disabled = false;
     }
 
     scrolltoBottom() {
-        const chatThread = document.getElementById('thread');
+        const chatThread = this.widgetShadow.getElementById('thread');
         chatThread.scrollTop = chatThread.scrollHeight;
     }
 
@@ -720,7 +908,7 @@ class MessageWidget {
         let conditionals = block.block_conditionals;
         this.addBotReply(block);
         await this.typewriter();
-        const messageThread = document.getElementById('thread');
+        const messageThread = this.widgetShadow.getElementById('thread');
 
         const messageResponse = document.createElement('li');
         messageResponse.className = 'message-response';
@@ -762,7 +950,7 @@ class MessageWidget {
     }
 
     showSuccessButton(){
-        const messageThread = document.getElementById('thread');
+        const messageThread = this.widgetShadow.getElementById('thread');
 
         const messageResponse = document.createElement('li');
         messageResponse.className = 'message-response';
@@ -891,7 +1079,7 @@ class MessageWidget {
 
     typewriter() {
         return new Promise((resolve, reject) => {
-            const messageRecepients = document.getElementsByClassName('message-recepient');
+            const messageRecepients = this.widgetShadow.querySelectorAll('.message-recepient');
             const messages = messageRecepients[messageRecepients.length - 1].getElementsByClassName('message')[0];
             const pTags = messages.getElementsByTagName("p");
             const ptag = pTags[pTags.length - 1];
@@ -908,7 +1096,7 @@ class MessageWidget {
     }
 
     addTypingAnimation() {
-        const messageThread = document.getElementById('thread');
+        const messageThread = this.widgetShadow.getElementById('thread');
         const messageRecipient = document.createElement('li');
         messageRecipient.className = 'message-recepient';
         messageRecipient.id = 'typing-indicator'; // Assign an ID to easily remove it later
@@ -960,7 +1148,7 @@ class MessageWidget {
     }
 
     removeTypingIndicator() {
-        const typingIndicator = document.getElementById('typing-indicator');
+        const typingIndicator = this.widgetShadow.getElementById('typing-indicator');
         if (typingIndicator) {
             typingIndicator.remove();
         }
