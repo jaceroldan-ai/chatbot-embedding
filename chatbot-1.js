@@ -197,6 +197,71 @@ const styles = `
         padding: 8px 12px;
     }
 
+    @keyframes typingAnimation {
+        0% {
+            transform: translateY(0px);
+            background-color: #3974EA; /* Replace with your indigo color */
+        }
+        28% {
+            transform: translateY(-6px);
+            background-color: #3974EA; /* Replace with your accent color */
+        }
+        48% {
+            transform: translateY(0px);
+            background-color: #3974EA; /* Replace with your accent-highlight color */
+        }
+    }
+
+    .bubble-container {
+        background-color: #f8bbd0; /* Replace with your accent-container color */
+        padding: 4px 10px;
+        display: inline-block;
+        border-radius: 20px;
+    }
+
+    .typing {
+        display: flex;
+        align-items: center;
+        height: 20px;
+        background-color: #EDF7FE;
+        border-radius: 20px;
+        padding: 6px 10px;
+        }
+
+    .typing-wrapper {
+        display: flex;
+    }
+
+    .bullet {
+        width: 6px;
+        height: 6px;
+        background-color: #5c6ac4; /* Replace with your indigo color */
+        border-radius: 50%;
+        margin-right: 4px;
+        vertical-align: middle;
+        display: inline-block;
+        animation: typingAnimation 1.5s infinite ease-in-out;
+    }
+
+    .bullet:nth-child(1) {
+        animation-delay: 200ms;
+    }
+
+    .bullet:nth-child(2) {
+        animation-delay: 300ms;
+    }
+
+    .bullet:last-child {
+        animation-delay: 400ms;
+        margin-right: 0;
+    }
+
+    .thinking-text {
+        margin-left: 10px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #67747E;
+    }
 `;
 
 const MESSAGE_ICON = `
@@ -331,43 +396,6 @@ class MessageWidget {
         messageThread.setAttribute('id', 'thread')
         messageThread.className = 'message-thread';
 
-
-        // const messageRecipient = document.createElement('li');
-        // messageRecipient.className = 'message-recepient';
-        // const recipientIconContainer = document.createElement('div');
-        // recipientIconContainer.className = 'icon-container';
-        // const recipientIcon = document.createElement('i');
-        // recipientIcon.className = 'mdi mdi-creation mdi-24px';
-        // recipientIconContainer.appendChild(recipientIcon);
-        // const recipientMessage = document.createElement('div');
-        // recipientMessage.className = 'message';
-        // const recipientMessageHeader = document.createElement('p');
-        // recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
-        // const recipientMessageText = document.createElement('p');
-        // recipientMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
-        // recipientMessage.appendChild(recipientMessageHeader);
-        // recipientMessage.appendChild(recipientMessageText);
-        // messageRecipient.appendChild(recipientIconContainer);
-        // messageRecipient.appendChild(recipientMessage);
-        // messageThread.appendChild(messageRecipient);
-
-        // const messageSender = document.createElement('li');
-        // messageSender.className = 'message-sender';
-        // // const senderImg = document.createElement('img');
-        // const senderImg = document.createElement('i')
-        // senderImg.className = 'mdi mdi-account mdi-24px';
-        // const senderMessage = document.createElement('div');
-        // senderMessage.className = 'message';
-        // const senderMessageHeader = document.createElement('p');
-        // senderMessageHeader.innerHTML = '<strong>You</strong>';
-        // const senderMessageText = document.createElement('p');
-        // senderMessageText.textContent = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Autem, officiis veritatis optio libero suscipit laborum unde reiciendis accusamus corporis tempore.';
-        // senderMessage.appendChild(senderMessageHeader);
-        // senderMessage.appendChild(senderMessageText);
-        // messageSender.appendChild(senderImg);
-        // messageSender.appendChild(senderMessage);
-        // messageThread.appendChild(messageSender);
-
         body.appendChild(messageThread);
         this.widgetContainer.appendChild(body);
 
@@ -451,8 +479,8 @@ class MessageWidget {
 
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
-            const conversationTemplatePk = 82;
-            const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-preset/filter/?template__pk=${conversationTemplatePk}`;
+            const conversationTemplatePk = 67;
+            const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-message-blocks/filter/?pk=${conversationTemplatePk}`;
 
             const req = new XMLHttpRequest();
             req.onreadystatechange = function() {
@@ -472,7 +500,6 @@ class MessageWidget {
     }
 
     async setUpMessageBlock(activePreset, block) {
-        console.log(block)
         try {
             if (block) {
                 this.activeBlock = block
@@ -484,6 +511,7 @@ class MessageWidget {
                 this.activeBlock = activePreset.message_blocks.find(block => block.pk ==  nextId);
                 this.conditionalBlock = null;
             }
+            this.disableInput()
             if (this.activeBlock.type ===FIXED) {
                 this.addBotReply(this.activeBlock);
                 await this.typewriter();
@@ -501,7 +529,11 @@ class MessageWidget {
                     cardPayload.others_question = this.activeBlock.text;
                 }
                 this.addBotReply(this.activeBlock)
+                await this.typewriter();
             } else if (this.activeBlock.type === AI_PROMPT) {
+                this.addTypingIndicator()
+                // Clear text in case block was configured to have a text despite being an AI_Prompt
+                this.activeBlock.text = '';
                 const payload = {
                     pk: this.activeBlock.pk,
                     messages: messages,
@@ -532,7 +564,7 @@ class MessageWidget {
     }
 
     addBotReply(block){
-        this.disableInput()
+        this.removeTypingIndicator()
         const messageThread = document.getElementById('thread');
         const messageRecipient = document.createElement('li');
         messageRecipient.className = 'message-recepient';
@@ -585,7 +617,8 @@ class MessageWidget {
     }
 
     handleUserResponse() {
-        this.enableInput();
+        if (this.activeBlock.type != CONDITIONAL)
+            this.enableInput();
         return new Promise((resolve) => {
             this.pendingResolve = resolve;
         });
@@ -764,7 +797,7 @@ class MessageWidget {
         if (payload?.message && !payload.message.includes('`')) {
             if (await this._parseMessage(payload.message)) {
                 this.activeBlock.text += payload.message;
-            }else{
+            } else {
                 if (isStreaming === false) {
                     await this.addBotReply(this.activeBlock);
                     await this.typewriter();
@@ -775,7 +808,7 @@ class MessageWidget {
                 }, 1000);
 
             }
-        }else if (this.activeBlock.text === "undefined"){
+        } else if (this.activeBlock.text === "undefined"){
             this.activeBlock.text = ""
         }
     }
@@ -862,17 +895,77 @@ class MessageWidget {
             const messages = messageRecepients[messageRecepients.length - 1].getElementsByClassName('message')[0];
             const pTags = messages.getElementsByTagName("p");
             const ptag = pTags[pTags.length - 1];
-    
+
             for (let i = 0; i < text.length; i++) {
                 setTimeout(() => {
                     ptag.innerHTML += text.charAt(i);
                 }, i * 8);
             }
-            setTimeout(() => {  
+            setTimeout(() => {
                 resolve();
             }, text.length * 8);
         });
     }
+
+    addTypingAnimation() {
+        const messageThread = document.getElementById('thread');
+        const messageRecipient = document.createElement('li');
+        messageRecipient.className = 'message-recepient';
+        messageRecipient.id = 'typing-indicator'; // Assign an ID to easily remove it later
+
+        const recipientIconContainer = document.createElement('div');
+        recipientIconContainer.className = 'icon-container';
+        const recipientIcon = document.createElement('i');
+        recipientIcon.className = 'mdi mdi-creation mdi-24px';
+        recipientIconContainer.appendChild(recipientIcon);
+
+        const recipientMessage = document.createElement('div');
+        recipientMessage.className = 'message';
+
+        const recipientMessageHeader = document.createElement('p');
+        recipientMessageHeader.innerHTML = '<strong>Zenbot</strong>';
+
+        const typingContainerWrapper = document.createElement('div');
+        typingContainerWrapper.className = 'typing-wrapper'; // Wrapper for typing animation and text
+
+        const typingContainer = document.createElement('div');
+        typingContainer.className = 'typing';
+
+        for (let i = 0; i < 3; i++) {
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            typingContainer.appendChild(bullet);
+        }
+
+        const thinkingText = document.createElement('span');
+        thinkingText.className = 'thinking-text';
+        thinkingText.textContent = 'Zenbot is thinking...';
+
+        typingContainerWrapper.appendChild(typingContainer);
+        typingContainerWrapper.appendChild(thinkingText);
+
+        recipientMessage.appendChild(recipientMessageHeader);
+        recipientMessage.appendChild(typingContainerWrapper);
+
+        messageRecipient.appendChild(recipientIconContainer);
+        messageRecipient.appendChild(recipientMessage);
+        messageThread.appendChild(messageRecipient);
+
+        this.scrolltoBottom();
+    }
+
+
+    addTypingIndicator() {
+        this.addTypingAnimation();
+    }
+
+    removeTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
 }
 
 function initializeWidget() {
