@@ -110,11 +110,15 @@ const styles = `
         gap: 8px;
     }
 
-    .message-sender img {
-        display: inline-block;
-        height: 48px;
+    .message-sender .icon-container {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 36px;
         width: 48px;
         border-radius: 50%;
+        background-color: var(--transparent);
+        color: var(--color-black);
         flex-shrink: 0;
     }
 
@@ -595,9 +599,12 @@ class MessageWidget {
         const messageThread = document.getElementById('thread');
         const messageSender = document.createElement('li');
         messageSender.className = 'message-sender';
+        const senderIconContainer = document.createElement('div');
+        senderIconContainer.className = 'icon-container';
         // const senderImg = document.createElement('img');
         const senderImg = document.createElement('i')
         senderImg.className = 'mdi mdi-account mdi-24px';
+        senderIconContainer.appendChild(senderImg);
         const senderMessage = document.createElement('div');
         senderMessage.className = 'message';
         const senderMessageHeader = document.createElement('p');
@@ -610,7 +617,7 @@ class MessageWidget {
         });
         senderMessage.appendChild(senderMessageHeader);
         senderMessage.appendChild(senderMessageText);
-        messageSender.appendChild(senderImg);
+        messageSender.appendChild(senderIconContainer);
         messageSender.appendChild(senderMessage);
         messageThread.appendChild(messageSender);
         this.scrolltoBottom();
