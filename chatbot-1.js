@@ -483,7 +483,6 @@ class MessageWidget {
 
         // Create a shadow root for the container
         const containerShadowRoot = containerWrapper.attachShadow({ mode: 'open' });
-        
         const container = document.createElement("div");
         containerShadowRoot.appendChild(container);
         /**
@@ -665,8 +664,21 @@ class MessageWidget {
 
     fetchMessageBlocks() {
         return new Promise((resolve, reject) => {
-            const conversationTemplatePk = 67;
-            const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-message-blocks/filter/?pk=${conversationTemplatePk}`;
+            const scriptTags = document.querySelectorAll('script');
+            let scriptTag;
+            for (let item of scriptTags) {
+                if (item.attributes.getNamedItem('data-param'))
+                    scriptTag = item;
+            }
+
+
+            let pk = 1;
+
+            if (scriptTag && scriptTag.attributes.getNamedItem('data-param')) {
+                pk = String(scriptTag.attributes.getNamedItem('data-param').value);
+            }
+            console.log(pk)
+            const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-message-blocks/filter/?pk=${pk}`;
 
             const req = new XMLHttpRequest();
             req.onreadystatechange = function() {
@@ -1020,7 +1032,6 @@ class MessageWidget {
             body: form,
           });
           return response.json();
-        
     }
 
 
