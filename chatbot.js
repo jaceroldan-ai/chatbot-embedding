@@ -107,6 +107,7 @@ const styles = `
         padding-block: 8px;
         min-height: 96px;
         resize: vertical;
+        font-family: Inter, Arial, Helvetica, sans-serif;
     }
 
     input[type="text"]::placeholder,
@@ -344,7 +345,7 @@ const styles = `
     .message-field .actions {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         border-radius: 0 0 4px 4px;
         border: 1px solid  #DDE1E3;
         border-top-color: transparent;
