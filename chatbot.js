@@ -678,7 +678,6 @@ class MessageWidget {
             if (scriptTag && scriptTag.attributes.getNamedItem('data-param')) {
                 pk = String(scriptTag.attributes.getNamedItem('data-param').value);
             }
-            console.log(pk)
             const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-message-blocks/filter/?pk=${pk}`;
 
             const req = new XMLHttpRequest();
