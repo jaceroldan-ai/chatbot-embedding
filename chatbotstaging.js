@@ -615,7 +615,7 @@ class MessageWidget {
         this.widgetShadow.appendChild(this.widgetContainer);
 
         this.token = await this.fetchWebsocketToken();
-        const url = `ws://localhost:8000/websocket/command-board-chatbot/?token=${this.token}`;
+        const url = `wss://develop-centralbpo.cxrole.com/websocket/command-board-chatbot/?token=${this.token}`;
         const websocket = new WebSocket(url);
 
         websocket.onmessage = (message) => {
@@ -678,7 +678,7 @@ class MessageWidget {
             if (scriptTag && scriptTag.attributes.getNamedItem('data-param')) {
                 pk = String(scriptTag.attributes.getNamedItem('data-param').value);
             }
-            const url = `http://localhost:8000/api-sileo/v1/ai/conversation-template-message-blocks/filter/?pk=${pk}`;
+            const url = `https://staging-centralbpo.cxrole.com/api-sileo/v1/ai/conversation-template-message-blocks/filter/?pk=${pk}`;
 
             const req = new XMLHttpRequest();
             req.onreadystatechange = function() {
@@ -853,7 +853,7 @@ class MessageWidget {
     fetchWebsocketToken() {
         return new Promise((resolve, reject) => {
             const token = crypto.randomUUID();
-            const url = `http://localhost:8000/websocket-boards-chatbot-token/?token=${token}`;
+            const url = `https://staging-centralbpo.cxrole.com/websocket-boards-chatbot-token/?token=${token}`;
             const req = new XMLHttpRequest();
 
             req.onreadystatechange = function() {
@@ -873,7 +873,7 @@ class MessageWidget {
 
     fetchAiCompletion(payload) {
         return new Promise((resolve, reject) => {
-            const url = `http://localhost:8000/board/ai-completion`
+            const url = `https://staging-centralbpo.cxrole.com/board/ai-completion`
             const form = new FormData();
             const req = new XMLHttpRequest();
 
@@ -1020,7 +1020,7 @@ class MessageWidget {
         });
     }
     async submitConcern(payload){
-        const url = `http://localhost:8000/api-sileo/v1/hqzen/command-board-chatbot-internal-card/create/`;
+        const url = `https://staging-centralbpo.cxrole.com/api-sileo/v1/hqzen/command-board-chatbot-internal-card/create/`;
         const form = new FormData();
 
         for(let field in payload){
